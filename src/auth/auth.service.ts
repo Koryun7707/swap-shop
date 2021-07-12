@@ -1,10 +1,16 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UserLoginDto } from './dto/UserLoginDto';
 import { UserEntity } from '../user/user.entity';
 import { UserRepository } from '../user/user.repository';
 import { TokenPayloadDto } from './dto/TokenPayloadDto';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { UserDto } from '../user/dto/UserDto';
+import { LoginPayloadDto } from './dto/LoginPayloadDto';
 
 @Injectable()
 export class AuthService {
@@ -17,13 +23,15 @@ export class AuthService {
       email,
     });
   }
-  async loginUser(userLoginDto: UserLoginDto): Promise<any> {
+  async loginUser(userLoginDto: UserLoginDto): Promise<LoginPayloadDto> {
     const userEntity = await this.validateUser(userLoginDto);
+    if (!userEntity.verified) {
+      throw new UnauthorizedException();
+    }
+
+    // const userEntity = await this.validateUser(userLoginDto);
     const token = await this.createToken(userEntity);
-    return {
-      userEntity,
-      token,
-    };
+    return new LoginPayloadDto(userEntity.toDto(), token);
   }
   async validateUser(userLoginDto: UserLoginDto): Promise<UserEntity> {
     const user = await this.getUserByEmail(userLoginDto.email);
@@ -36,7 +44,7 @@ export class AuthService {
     }
     return user;
   }
-  async createToken(user: UserEntity): Promise<any> {
+  async createToken(user: UserDto): Promise<any> {
     return new TokenPayloadDto({
       expiresIn: Number(process.env.JWT_EXPIRATION_TIME),
       accessToken: await this.jwtService.signAsync({ id: user.id }),

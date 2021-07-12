@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { UserRegisterDto } from '../auth/dto/UserRegisterDto';
 import { UserVerifyDto } from '../auth/dto/UserVerifyDto';
 import { UserEntity } from './user.entity';
@@ -6,6 +6,7 @@ import { UserRepository } from './user.repository';
 import { UserDto } from './dto/UserDto';
 import * as bcrypt from 'bcrypt';
 import { FindConditions } from 'typeorm';
+import { UserUpdateDto } from './dto/UserUpdateDto';
 
 @Injectable()
 export class UserService {
@@ -71,5 +72,18 @@ export class UserService {
     });
 
     return user.toDto();
+  }
+  async updateUser(
+    user: UserEntity,
+    userData: UserUpdateDto,
+  ): Promise<UserDto> {
+    const verifyUser = await this.checkIfUserVerify();
+    if (!verifyUser) {
+      throw new BadRequestException('user no verified');
+    }
+    await this.userRepository.update({ id: user.id }, userData);
+    const updateUser = await this.userRepository.findOne({ id: user.id });
+
+    return new UserDto(updateUser);
   }
 }

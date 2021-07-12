@@ -1,12 +1,10 @@
 import {
   BadRequestException,
   Body,
-  CACHE_MANAGER,
   ConflictException,
   Controller,
   HttpCode,
   HttpStatus,
-  Inject,
   NotFoundException,
   Post,
 } from '@nestjs/common';
@@ -19,6 +17,7 @@ import { UserVerifyDto } from './dto/UserVerifyDto';
 import { UserRepository } from '../user/user.repository';
 import { UserLoginDto } from './dto/UserLoginDto';
 import { AuthService } from './auth.service';
+import { LoginPayloadDto } from "./dto/LoginPayloadDto";
 
 @Controller('auth')
 @ApiTags('auth')
@@ -27,7 +26,7 @@ export class AuthController {
     public readonly authService: AuthService,
     public readonly userService: UserService,
     public readonly mailService: MailService,
-    private readonly userRepository: UserRepository, // @Inject(CACHE_MANAGER) private readonly _cacheManager: Cache,
+    private readonly userRepository: UserRepository,
   ) {}
   @Post('register')
   @HttpCode(HttpStatus.OK)
@@ -41,16 +40,12 @@ export class AuthController {
       throw new ConflictException();
     }
 
-    const createdUser = await this.userService.createUser(
-      userRegisterDto,
-      // file,
-    );
+    const createdUser = await this.userService.createUser(userRegisterDto);
     const code = Math.floor(1000 + Math.random() * 9000);
     await this.userRepository.update(
       { email: createdUser.email },
       { verifiedCode: code },
     );
-    // await this._cacheManager.set(code, createdUser.id, { ttl: 3600 });
 
     const user = createdUser.toDto();
     await this.mailService.sendConfirmationEmail(user, code);
@@ -80,7 +75,7 @@ export class AuthController {
   }
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async userLogin(@Body() userLoginDto: UserLoginDto): Promise<any> {
+  async userLogin(@Body() userLoginDto: UserLoginDto): Promise<LoginPayloadDto> {
     return this.authService.loginUser(userLoginDto);
   }
 }
