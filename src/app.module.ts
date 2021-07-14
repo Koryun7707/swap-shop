@@ -6,6 +6,7 @@ import { UserModule } from './user/user.module';
 import { UserEntity } from './user/user.entity';
 import { MailModule } from './mail/mail.module';
 import { SharedModule } from './shared/shared.module';
+import { ProductModule } from './product/product.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { SharedModule } from './shared/shared.module';
     UserModule,
     MailModule,
     SharedModule,
+    ProductModule,
   ],
   controllers: [],
   providers: [],

@@ -8,8 +8,9 @@ import {
   Post,
   Put,
   UploadedFile,
-  UseGuards, UseInterceptors
-} from "@nestjs/common";
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { AuthGuard } from '../guards/auth.guard';
 import { AuthUser } from '../decorators/auth-user.decorator';
@@ -19,7 +20,7 @@ import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../guards/jwt.auth.guard';
 import { UserUpdateDto } from './dto/UserUpdateDto';
 import { IFile } from '../interfaces/IFile';
-import { FileInterceptor } from "@nestjs/platform-express";
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('user')
 @ApiTags('user')
