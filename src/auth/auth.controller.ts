@@ -17,7 +17,8 @@ import { UserVerifyDto } from './dto/UserVerifyDto';
 import { UserRepository } from '../user/user.repository';
 import { UserLoginDto } from './dto/UserLoginDto';
 import { AuthService } from './auth.service';
-import { LoginPayloadDto } from "./dto/LoginPayloadDto";
+import { LoginPayloadDto } from './dto/LoginPayloadDto';
+import { ResetPasswordConfirmDto } from './dto/ResetPasswordConfirmDto';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -46,7 +47,6 @@ export class AuthController {
       { email: createdUser.email },
       { verifiedCode: code },
     );
-
     const user = createdUser.toDto();
     await this.mailService.sendConfirmationEmail(user, code);
     return user;
@@ -75,7 +75,21 @@ export class AuthController {
   }
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async userLogin(@Body() userLoginDto: UserLoginDto): Promise<LoginPayloadDto> {
+  async userLogin(
+    @Body() userLoginDto: UserLoginDto,
+  ): Promise<LoginPayloadDto> {
     return this.authService.loginUser(userLoginDto);
+  }
+  @Post('resetPassword')
+  @HttpCode(HttpStatus.OK)
+  async resetPassword(@Body() email: string): Promise<void> {
+    return this.authService.resetPassword(email);
+  }
+  @Post('resetPassword/confirm')
+  @HttpCode(HttpStatus.OK)
+  async resetPasswordConfirm(
+    @Body() resetPasswordConfirmDto: ResetPasswordConfirmDto,
+  ): Promise<UserDto> {
+    return this.authService.resetPasswordConfirm(resetPasswordConfirmDto);
   }
 }

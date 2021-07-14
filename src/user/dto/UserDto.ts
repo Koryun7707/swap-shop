@@ -27,6 +27,12 @@ export class UserDto extends AbstractDto {
   @ApiPropertyOptional()
   email: string;
 
+  @ApiPropertyOptional()
+  profilePicture: string;
+
+  @ApiPropertyOptional()
+  description: string;
+
   constructor(user: UserEntity) {
     super(user);
     this.email = user.email;
@@ -36,5 +42,7 @@ export class UserDto extends AbstractDto {
     this.address2 = user.address2;
     this.gender = user.gender;
     this.postCode = user.postCode;
+    this.profilePicture = user.profilePicture;
+    this.description = user.description;
   }
 }

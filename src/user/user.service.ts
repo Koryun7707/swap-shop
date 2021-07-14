@@ -7,10 +7,17 @@ import { UserDto } from './dto/UserDto';
 import * as bcrypt from 'bcrypt';
 import { FindConditions } from 'typeorm';
 import { UserUpdateDto } from './dto/UserUpdateDto';
+import { IFile } from '../interfaces/IFile';
+import { ValidatorService } from '../shared/services/validator.service';
+import { FileNotImageException } from '../exceptions/file-not-image.exception';
+import { AwsS3Service } from '../shared/services/aws-s3.service';
 
 @Injectable()
 export class UserService {
-  constructor(public readonly userRepository: UserRepository) {}
+  constructor(
+    public readonly userRepository: UserRepository,
+    public readonly awsS3Service: AwsS3Service,
+  ) {}
 
   async findUser(userId: string): Promise<UserDto> {
     const user = await this.findOne({ id: userId });
@@ -27,7 +34,7 @@ export class UserService {
    * @param {string} password
    * @returns {string}
    */
-  generateHash(password: string): string {
+  public generateHash(password: string): string {
     return bcrypt.hashSync(password, 10);
   }
   async createUser(userRegisterDto: UserRegisterDto): Promise<UserEntity> {
@@ -65,7 +72,7 @@ export class UserService {
   async verifyUser(userVerifyDto: UserVerifyDto): Promise<UserDto> {
     await this.userRepository.update(
       { email: userVerifyDto.email },
-      { verified: true },
+      { verified: true, verifiedCode: null },
     );
     const user = await this.userRepository.findOne({
       email: userVerifyDto.email,
@@ -85,5 +92,25 @@ export class UserService {
     const updateUser = await this.userRepository.findOne({ id: user.id });
 
     return new UserDto(updateUser);
+  }
+  async uploadImage(
+    type: string,
+    file: IFile,
+    user: UserEntity,
+  ): Promise<UserDto> {
+    if (!file || !ValidatorService.isImage(file.mimetype)) {
+      throw new FileNotImageException();
+    }
+
+    const path = await this.awsS3Service.uploadImage(file);
+
+    await this.userRepository.update(
+      {
+        id: user.id,
+      },
+      { profilePicture: path },
+    );
+    const updateUser = await this.userRepository.findOne({ id: user.id });
+    return updateUser.toDto();
   }
 }

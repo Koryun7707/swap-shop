@@ -4,9 +4,12 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Param,
+  Post,
   Put,
-  UseGuards,
-} from '@nestjs/common';
+  UploadedFile,
+  UseGuards, UseInterceptors
+} from "@nestjs/common";
 import { UserService } from './user.service';
 import { AuthGuard } from '../guards/auth.guard';
 import { AuthUser } from '../decorators/auth-user.decorator';
@@ -15,6 +18,8 @@ import { UserDto } from './dto/UserDto';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../guards/jwt.auth.guard';
 import { UserUpdateDto } from './dto/UserUpdateDto';
+import { IFile } from '../interfaces/IFile';
+import { FileInterceptor } from "@nestjs/platform-express";
 
 @Controller('user')
 @ApiTags('user')
@@ -44,5 +49,19 @@ export class UserController {
     @Body() userData: UserUpdateDto,
   ): Promise<UserDto> {
     return this.userService.updateUser(user, userData);
+  }
+  @UseGuards(AuthGuard)
+  @Post('uploadProfilePicture')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    description: 'upload image',
+  })
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadImage(
+    @Param('type') typeUpload: string,
+    @UploadedFile() file: IFile,
+    @AuthUser() user: UserEntity,
+  ): Promise<UserDto> {
+    return this.userService.uploadImage(typeUpload, file, user);
   }
 }

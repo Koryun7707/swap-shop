@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -11,12 +12,17 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UserDto } from '../user/dto/UserDto';
 import { LoginPayloadDto } from './dto/LoginPayloadDto';
+import { MailService } from '../mail/mail.service';
+import { ResetPasswordConfirmDto } from './dto/ResetPasswordConfirmDto';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     public readonly userRepository: UserRepository,
     public readonly jwtService: JwtService,
+    public readonly mailService: MailService,
+    public readonly userService: UserService,
   ) {}
   async getUserByEmail(email: string): Promise<UserEntity> {
     return this.userRepository.findOne({
@@ -52,5 +58,44 @@ export class AuthService {
   }
   async validateHash(password: string, hash: string): Promise<boolean> {
     return bcrypt.compare(password, hash || '');
+  }
+  async resetPassword(email: string): Promise<void> {
+    const user = await this.userRepository.findOne(email);
+    if (!user) {
+      throw new NotFoundException();
+    }
+    const code = Math.floor(1000 + Math.random() * 9000);
+    await this.userRepository.update(
+      { email: user.email },
+      { verifiedCode: code },
+    );
+    await this.mailService.sendConfirmationEmail(user, code);
+  }
+  async resetPasswordConfirm(
+    resetPasswordConfirmDto: ResetPasswordConfirmDto,
+  ): Promise<UserDto> {
+    const user = await this.userRepository.findOne({
+      email: resetPasswordConfirmDto.email,
+    });
+    if (!user) {
+      throw new NotFoundException();
+    }
+    const checkCode = await this.userService.checkVerifyCode(
+      resetPasswordConfirmDto.email,
+      resetPasswordConfirmDto.code,
+    );
+    if (!checkCode) {
+      throw new BadRequestException('incorrect code');
+    }
+    await this.userRepository.update(
+      { email: user.email },
+      {
+        password: this.userService.generateHash(
+          resetPasswordConfirmDto.password,
+        ),
+        verifiedCode: null,
+      },
+    );
+    return user.toDto();
   }
 }
