@@ -4,8 +4,6 @@ import { UploadProductDto } from './dto/UploadProductDto';
 import { ProductDto } from './dto/ProductDto';
 import { ProductRepository } from './product.repository';
 import { IFile } from '../interfaces/IFile';
-import { ValidatorService } from '../shared/services/validator.service';
-import { FileNotImageException } from '../exceptions/file-not-image.exception';
 import { AwsS3Service } from '../shared/services/aws-s3.service';
 
 @Injectable()
@@ -19,15 +17,13 @@ export class ProductService {
     uploadProductDto: UploadProductDto,
     files: Array<IFile>,
   ): Promise<ProductDto> {
-    const images = [];
+    let images: string[];
     if (files.length) {
-      files.map(async (file) => {
-        if (!file || !ValidatorService.isImage(file.mimetype)) {
-          throw new FileNotImageException();
-        }
-        const path = await this.awsS3Service.uploadImage(file);
-        images.push(path);
-      });
+      images = await Promise.all(
+        files.map(async (file): Promise<string> => {
+          return await this.awsS3Service.uploadImage(file);
+        }),
+      );
     }
     const productModel = await this.productRepository.create({
       ...uploadProductDto,
@@ -36,5 +32,13 @@ export class ProductService {
     });
     const product = await this.productRepository.save(productModel);
     return product.toDto();
+  }
+  async getProducts(user: UserEntity): Promise<ProductDto[]> {
+    const productsModel = await this.productRepository.find({
+      where: {
+        userId: user.id,
+      },
+    });
+    return productsModel.map((product) => product.toDto());
   }
 }

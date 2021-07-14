@@ -1,13 +1,13 @@
 import {
   Body,
-  Controller,
+  Controller, Get,
   HttpCode,
   HttpStatus,
   Post,
   UploadedFiles,
   UseGuards,
-  UseInterceptors,
-} from '@nestjs/common';
+  UseInterceptors
+} from "@nestjs/common";
 import { AuthGuard } from '../guards/auth.guard';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { UploadProductDto } from './dto/UploadProductDto';
@@ -37,5 +37,17 @@ export class ProductController {
     @UploadedFiles() files: Array<IFile>,
   ): Promise<ProductDto> {
     return this.productService.uploadProduct(user, uploadProductDto, files);
+  }
+  @UseGuards(AuthGuard)
+  @Get('')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    type: [ProductDto],
+    description: 'get products',
+  })
+  async getProducts(
+    @AuthUser() user: UserEntity
+  ): Promise<ProductDto[]> {
+    return this.productService.getProducts(user);
   }
 }

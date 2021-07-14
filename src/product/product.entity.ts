@@ -1,10 +1,19 @@
-import { Column, CreateDateColumn, Entity, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  UpdateDateColumn,
+} from 'typeorm';
 import { AbstractEntity } from '../common/abstract.entity';
 import { ProductDto } from './dto/ProductDto';
+import { UserEntity } from '../user/user.entity';
 
 @Entity({ name: 'product' })
 export class ProductEntity extends AbstractEntity<ProductDto> {
-  @Column({ nullable: false })
+  @ManyToOne(() => UserEntity, (user) => user.id, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'userId' })
   userId: string;
 
   @Column({ nullable: false })
