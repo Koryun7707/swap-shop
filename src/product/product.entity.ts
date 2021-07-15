@@ -13,8 +13,8 @@ import { UserEntity } from '../user/user.entity';
 @Entity({ name: 'product' })
 export class ProductEntity extends AbstractEntity<ProductDto> {
   @ManyToOne(() => UserEntity, (user) => user.id, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'userId' })
-  userId: string;
+  @JoinColumn({ name: 'user' })
+  user: string;
 
   @Column({ nullable: false })
   name: string;

@@ -1,13 +1,17 @@
 import {
   Body,
-  Controller, Get,
+  Controller,
+  Delete,
+  Get,
   HttpCode,
   HttpStatus,
+  Param,
   Post,
+  Query,
   UploadedFiles,
   UseGuards,
-  UseInterceptors
-} from "@nestjs/common";
+  UseInterceptors,
+} from '@nestjs/common';
 import { AuthGuard } from '../guards/auth.guard';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { UploadProductDto } from './dto/UploadProductDto';
@@ -45,9 +49,43 @@ export class ProductController {
     type: [ProductDto],
     description: 'get products',
   })
-  async getProducts(
-    @AuthUser() user: UserEntity
-  ): Promise<ProductDto[]> {
+  async getProducts(@AuthUser() user: UserEntity): Promise<ProductDto[]> {
     return this.productService.getProducts(user);
+  }
+  @UseGuards(AuthGuard)
+  @Get('all')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    type: [ProductDto],
+    description: 'get All products',
+  })
+  async getAllProducts(): Promise<ProductDto[]> {
+    return this.productService.getAllProducts();
+  }
+  @UseGuards(AuthGuard)
+  @Delete(':id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    type: ProductDto,
+    description: 'Delete products',
+  })
+  async deleteProduct(
+    @AuthUser() user: UserEntity,
+    @Param('id') id: string,
+  ): Promise<void> {
+    return this.productService.deleteProduct(user, id);
+  }
+  @UseGuards(AuthGuard)
+  @Get('search')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    type: [ProductDto],
+    description: 'search products',
+  })
+  async searchProduct(
+    @AuthUser() user: UserEntity,
+    @Query('search') search?: string,
+  ): Promise<ProductDto[]> {
+    return this.productService.searchProduct(user, search);
   }
 }

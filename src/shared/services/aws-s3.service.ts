@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import * as AWS from 'aws-sdk';
 import * as mime from 'mime-types';
 
@@ -59,18 +59,16 @@ export class AwsS3Service {
   //   return `${this.configService.baseLink}${key}`;
   // }
   //
-  // async deleteFile(path: string): Promise<void> {
-  //   const awsS3Config = this.configService.awsS3Config;
-  //   const key = path.replace(awsS3Config.baseUrl, '');
-  //   await this._s3
-  //     .deleteObject(
-  //       {
-  //         Bucket: this.configService.awsS3Config.bucketName,
-  //         Key: key,
-  //       },
-  //       (err) =>
-  //         err ? Logger.error(err, 'AWS S3 Delete ERROR') : null,
-  //     )
-  //     .promise();
-  // }
+  async deleteFile(path: string): Promise<void> {
+    const key = path.replace(process.env.S3_BASELINK, '');
+    await this._s3
+      .deleteObject(
+        {
+          Bucket: process.env.S3_BUCKET_NAME,
+          Key: key,
+        },
+        (err) => (err ? Logger.error(err, 'AWS S3 Delete ERROR') : null),
+      )
+      .promise();
+  }
 }

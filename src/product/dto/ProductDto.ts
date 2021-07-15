@@ -7,7 +7,7 @@ import { ProductEntity } from '../product.entity';
 
 export class ProductDto extends AbstractDto {
   @ApiPropertyOptional()
-  userId: string;
+  user: string;
 
   @ApiPropertyOptional()
   name: string;
@@ -41,7 +41,7 @@ export class ProductDto extends AbstractDto {
 
   constructor(product: ProductEntity) {
     super(product);
-    this.userId = product.userId;
+    this.user = product.user;
     this.name = product.name;
     this.brandName = product.brandName;
     this.size = product.size;

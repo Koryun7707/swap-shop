@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { UserEntity } from '../user/user.entity';
 import { UploadProductDto } from './dto/UploadProductDto';
 import { ProductDto } from './dto/ProductDto';
 import { ProductRepository } from './product.repository';
 import { IFile } from '../interfaces/IFile';
 import { AwsS3Service } from '../shared/services/aws-s3.service';
+import { Brackets } from 'typeorm';
 
 @Injectable()
 export class ProductService {
@@ -27,7 +28,7 @@ export class ProductService {
     }
     const productModel = await this.productRepository.create({
       ...uploadProductDto,
-      userId: user.id,
+      user: user.id,
       images,
     });
     const product = await this.productRepository.save(productModel);
@@ -36,9 +37,55 @@ export class ProductService {
   async getProducts(user: UserEntity): Promise<ProductDto[]> {
     const productsModel = await this.productRepository.find({
       where: {
-        userId: user.id,
+        user: user.id,
       },
+      relations: ['user'],
     });
     return productsModel.map((product) => product.toDto());
+  }
+  async getAllProducts(): Promise<ProductDto[]> {
+    const productsModel = await this.productRepository.find();
+    return productsModel.map((product) => product.toDto());
+  }
+  async deleteProduct(user: UserEntity, id: string): Promise<void> {
+    const product = await this.productRepository.findOne({
+      where: {
+        user: user.id,
+        id,
+      },
+    });
+    if (!product) {
+      throw new NotFoundException();
+    }
+    if (product.images && product.images.length) {
+      await Promise.all(
+        product.images.map(async (file): Promise<void> => {
+          return await this.awsS3Service.deleteFile(file);
+        }),
+      );
+    }
+    await this.productRepository.delete(id);
+  }
+  async searchProduct(
+    user: UserEntity,
+    search?: string,
+  ): Promise<ProductDto[]> {
+    search = search.toLowerCase();
+    const product = this.productRepository
+      .createQueryBuilder('product')
+      .where(
+        new Brackets((qb) => {
+          qb.where(
+            'LOWER(product.name) like :name OR LOWER(product.brandName) like :brandName',
+            {
+              name: `%${search}%`,
+              brandName: `%${search}%`,
+            },
+          );
+        }),
+      )
+      .andWhere('product.user != :userId', { userId: user.id });
+    const result = await product.getMany();
+    return result.map((item) => item.toDto());
   }
 }
