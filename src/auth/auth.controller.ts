@@ -60,7 +60,9 @@ export class AuthController {
     if (!user) {
       throw new NotFoundException();
     }
-    const verifyUser = await this.userService.checkIfUserVerify();
+    const verifyUser = await this.userService.checkIfUserVerify(
+      userVerifyDto.email,
+    );
     if (verifyUser) {
       throw new BadRequestException('user has been verified');
     }

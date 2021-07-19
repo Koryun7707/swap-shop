@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { UserRegisterDto } from '../auth/dto/UserRegisterDto';
 import { UserVerifyDto } from '../auth/dto/UserVerifyDto';
 import { UserEntity } from './user.entity';
@@ -61,11 +65,12 @@ export class UserService {
         .getCount()) > 0
     );
   }
-  public async checkIfUserVerify(): Promise<boolean> {
+  public async checkIfUserVerify(email: string): Promise<boolean> {
     return (
       (await this.userRepository
         .createQueryBuilder('user')
         .where('user.verified= :verified', { verified: true })
+        .andWhere('user.email= :email', { email })
         .getCount()) > 0
     );
   }
@@ -84,7 +89,7 @@ export class UserService {
     user: UserEntity,
     userData: UserUpdateDto,
   ): Promise<UserDto> {
-    const verifyUser = await this.checkIfUserVerify();
+    const verifyUser = await this.checkIfUserVerify(user.email);
     if (!verifyUser) {
       throw new BadRequestException('user no verified');
     }
@@ -112,5 +117,23 @@ export class UserService {
     );
     const updateUser = await this.userRepository.findOne({ id: user.id });
     return updateUser.toDto();
+  }
+  async blockUser(user: UserEntity, blockUserId: string): Promise<UserDto> {
+    const userBlocked = await this.userRepository.findOne({ id: blockUserId });
+    if (!userBlocked) {
+      throw new NotFoundException('User not found');
+    }
+    userBlocked.blockedBy
+      ? userBlocked.blockedBy.push(user.id)
+      : (userBlocked.blockedBy = [user.id]);
+    userBlocked.blockedBy = [...new Set(userBlocked.blockedBy)];
+    await this.userRepository.save(userBlocked);
+    const userUpdate = await this.userRepository.findOne({ id: user.id });
+    userUpdate.blocked
+      ? userUpdate.blocked.push(blockUserId)
+      : (userUpdate.blocked = [blockUserId]);
+    userUpdate.blocked = [...new Set(userUpdate.blocked)];
+
+    return await this.userRepository.save(userUpdate);
   }
 }

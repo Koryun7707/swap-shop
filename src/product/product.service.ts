@@ -76,10 +76,12 @@ export class ProductService {
       .where(
         new Brackets((qb) => {
           qb.where(
-            'LOWER(product.name) like :name OR LOWER(product.brandName) like :brandName',
+            'LOWER(product.name) like :name OR LOWER(product.brandName) like :brandName OR LOWER(product.size) like :size OR LOWER(product.color) like :color',
             {
               name: `%${search}%`,
               brandName: `%${search}%`,
+              size: `%${search}%`,
+              color: `%${search}%`,
             },
           );
         }),

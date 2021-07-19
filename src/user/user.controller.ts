@@ -6,11 +6,11 @@ import {
   HttpStatus,
   Param,
   Post,
-  Put,
+  Put, Query,
   UploadedFile,
   UseGuards,
-  UseInterceptors,
-} from '@nestjs/common';
+  UseInterceptors
+} from "@nestjs/common";
 import { UserService } from './user.service';
 import { AuthGuard } from '../guards/auth.guard';
 import { AuthUser } from '../decorators/auth-user.decorator';
@@ -21,6 +21,7 @@ import { JwtAuthGuard } from '../guards/jwt.auth.guard';
 import { UserUpdateDto } from './dto/UserUpdateDto';
 import { IFile } from '../interfaces/IFile';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { BlockedUserDto } from "./dto/BlockedUserDto";
 
 @Controller('user')
 @ApiTags('user')
@@ -64,5 +65,18 @@ export class UserController {
     @AuthUser() user: UserEntity,
   ): Promise<UserDto> {
     return this.userService.uploadImage(typeUpload, file, user);
+  }
+  @UseGuards(AuthGuard)
+  @Post('blockUser')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    type: BlockedUserDto,
+    description: 'block user',
+  })
+  async blockUser(
+    @AuthUser() user: UserEntity,
+    @Query() { blockUserId }: any,
+  ): Promise<UserDto> {
+    return this.userService.blockUser(user, blockUserId);
   }
 }
