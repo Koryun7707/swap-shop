@@ -27,12 +27,14 @@ export class UserService {
     const user = await this.findOne({ id: userId });
     return new UserDto(user);
   }
+
   /**
    * Find single user
    */
   findOne(findData: FindConditions<UserEntity>): Promise<UserEntity> {
     return this.userRepository.findOne(findData);
   }
+
   /**
    * generate hash from password or string
    * @param {string} password
@@ -41,6 +43,7 @@ export class UserService {
   public generateHash(password: string): string {
     return bcrypt.hashSync(password, 10);
   }
+
   async createUser(userRegisterDto: UserRegisterDto): Promise<UserEntity> {
     const user = this.userRepository.create({
       ...userRegisterDto,
@@ -48,6 +51,7 @@ export class UserService {
     });
     return this.userRepository.save(user);
   }
+
   public async checkIfExists(email: string): Promise<boolean> {
     return (
       (await this.userRepository
@@ -56,6 +60,7 @@ export class UserService {
         .getCount()) > 0
     );
   }
+
   public async checkVerifyCode(email: string, code: number): Promise<boolean> {
     return (
       (await this.userRepository
@@ -65,6 +70,7 @@ export class UserService {
         .getCount()) > 0
     );
   }
+
   public async checkIfUserVerify(email: string): Promise<boolean> {
     return (
       (await this.userRepository
@@ -74,6 +80,7 @@ export class UserService {
         .getCount()) > 0
     );
   }
+
   async verifyUser(userVerifyDto: UserVerifyDto): Promise<UserDto> {
     await this.userRepository.update(
       { email: userVerifyDto.email },
@@ -85,6 +92,7 @@ export class UserService {
 
     return user.toDto();
   }
+
   async updateUser(
     user: UserEntity,
     userData: UserUpdateDto,
@@ -98,6 +106,7 @@ export class UserService {
 
     return new UserDto(updateUser);
   }
+
   async uploadImage(
     type: string,
     file: IFile,
@@ -118,11 +127,38 @@ export class UserService {
     const updateUser = await this.userRepository.findOne({ id: user.id });
     return updateUser.toDto();
   }
+
   async blockUser(user: UserEntity, blockUserId: string): Promise<UserDto> {
     const userBlocked = await this.userRepository.findOne({ id: blockUserId });
     if (!userBlocked) {
       throw new NotFoundException('User not found');
     }
+    return await this._block(userBlocked, user);
+  }
+
+  async unBlockUser(user: UserEntity, unBlockUserId: string): Promise<UserDto> {
+    const userBlocked = await this.userRepository.findOne({
+      id: unBlockUserId,
+    });
+    if (!userBlocked) {
+      throw new NotFoundException('User not found');
+    }
+    return await this._unBlock(userBlocked, user);
+  }
+
+  private async _unBlock(userBlocked: UserEntity, user: UserEntity) {
+    const index = userBlocked.blockedBy.indexOf(user.id);
+    const index1 = user.blocked.indexOf(userBlocked.id);
+    if (index === -1 || index1 === -1) {
+      throw new BadRequestException('user not blocked');
+    }
+    userBlocked.blockedBy.splice(index, 1);
+    await this.userRepository.save(userBlocked);
+    user.blocked.splice(index, 1);
+
+    return this.userRepository.save(user);
+  }
+  private async _block(userBlocked: UserEntity, user: UserEntity) {
     userBlocked.blockedBy
       ? userBlocked.blockedBy.push(user.id)
       : (userBlocked.blockedBy = [user.id]);
@@ -130,10 +166,10 @@ export class UserService {
     await this.userRepository.save(userBlocked);
     const userUpdate = await this.userRepository.findOne({ id: user.id });
     userUpdate.blocked
-      ? userUpdate.blocked.push(blockUserId)
-      : (userUpdate.blocked = [blockUserId]);
+      ? userUpdate.blocked.push(userBlocked.id)
+      : (userUpdate.blocked = [userBlocked.id]);
     userUpdate.blocked = [...new Set(userUpdate.blocked)];
 
-    return await this.userRepository.save(userUpdate);
+    return this.userRepository.save(userUpdate);
   }
 }

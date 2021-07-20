@@ -6,11 +6,13 @@ import { ProductRepository } from './product.repository';
 import { IFile } from '../interfaces/IFile';
 import { AwsS3Service } from '../shared/services/aws-s3.service';
 import { Brackets } from 'typeorm';
+import { UserRepository } from '../user/user.repository';
 
 @Injectable()
 export class ProductService {
   constructor(
     public readonly productRepository: ProductRepository,
+    public readonly userRepository: UserRepository,
     public readonly awsS3Service: AwsS3Service,
   ) {}
   async uploadProduct(
@@ -43,9 +45,8 @@ export class ProductService {
     });
     return productsModel.map((product) => product.toDto());
   }
-  async getAllProducts(): Promise<ProductDto[]> {
-    const productsModel = await this.productRepository.find();
-    return productsModel.map((product) => product.toDto());
+  async getAllProducts(user: UserEntity): Promise<ProductDto[]> {
+    return this._getNonBlockUsersProducts(user);
   }
   async deleteProduct(user: UserEntity, id: string): Promise<void> {
     const product = await this.productRepository.findOne({
@@ -88,6 +89,25 @@ export class ProductService {
       )
       .andWhere('product.user != :userId', { userId: user.id });
     const result = await product.getMany();
+    return result.map((item) => item.toDto());
+  }
+  private async _getNonBlockUsersProducts(
+    user: UserEntity,
+  ): Promise<ProductDto[]> {
+    const userModel = await this.userRepository.findOne({ id: user.id });
+    const product = await this.productRepository.createQueryBuilder('product');
+    if (userModel.blockedBy && userModel.blockedBy.length) {
+      product.where('product.user NOT IN (:...blockedBy)', {
+        blockedBy: userModel.blockedBy,
+      });
+    }
+    if (userModel.blocked && userModel.blocked.length) {
+      product.andWhere('product.user NOT IN (:...blocked)', {
+        blocked: userModel.blocked,
+      });
+    }
+    const result = await product.getMany();
+
     return result.map((item) => item.toDto());
   }
 }

@@ -59,8 +59,8 @@ export class ProductController {
     type: [ProductDto],
     description: 'get All products',
   })
-  async getAllProducts(): Promise<ProductDto[]> {
-    return this.productService.getAllProducts();
+  async getAllProducts(@AuthUser() user: UserEntity): Promise<ProductDto[]> {
+    return this.productService.getAllProducts(user);
   }
   @UseGuards(AuthGuard)
   @Delete(':id')

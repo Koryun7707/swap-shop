@@ -22,6 +22,7 @@ import { UserUpdateDto } from './dto/UserUpdateDto';
 import { IFile } from '../interfaces/IFile';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { BlockedUserDto } from "./dto/BlockedUserDto";
+import { UnBlockUserDto } from "./dto/UnBlockUserDto";
 
 @Controller('user')
 @ApiTags('user')
@@ -78,5 +79,18 @@ export class UserController {
     @Query() { blockUserId }: any,
   ): Promise<UserDto> {
     return this.userService.blockUser(user, blockUserId);
+  }
+  @UseGuards(AuthGuard)
+  @Post('unBlockUser')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    type: UnBlockUserDto,
+    description: 'un block user',
+  })
+  async unBlockUser(
+    @AuthUser() user: UserEntity,
+    @Query() { unBlockUserId }: any,
+  ): Promise<UserDto> {
+    return this.userService.unBlockUser(user, unBlockUserId);
   }
 }
