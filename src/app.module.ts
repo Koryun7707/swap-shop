@@ -8,6 +8,7 @@ import { MailModule } from './mail/mail.module';
 import { SharedModule } from './shared/shared.module';
 import { ProductModule } from './product/product.module';
 import { MessageModule } from './message/message.module';
+import { SwapModule } from './swap/swap.module';
 
 @Module({
   imports: [
@@ -22,7 +23,7 @@ import { MessageModule } from './message/message.module';
       username: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
-      entities: [UserEntity],
+      entities: ["dist/**/*.entity{.ts,.js}"],
       synchronize: true,
       autoLoadEntities: true,
     }),
@@ -32,6 +33,7 @@ import { MessageModule } from './message/message.module';
     SharedModule,
     ProductModule,
     MessageModule,
+    SwapModule,
   ],
   controllers: [],
   providers: [],
