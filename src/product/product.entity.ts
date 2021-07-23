@@ -9,6 +9,7 @@ import {
 import { AbstractEntity } from '../common/abstract.entity';
 import { ProductDto } from './dto/ProductDto';
 import { UserEntity } from '../user/user.entity';
+import { ProductConditionsEnum } from '../enums/product-conditions.enum';
 
 @Entity({ name: 'product' })
 export class ProductEntity extends AbstractEntity<ProductDto> {
@@ -31,8 +32,12 @@ export class ProductEntity extends AbstractEntity<ProductDto> {
   @Column({ nullable: true })
   description: string;
 
-  @Column({ nullable: true })
-  productCondition: string;
+  @Column({
+    type: 'enum',
+    enum: ProductConditionsEnum,
+    default: ProductConditionsEnum.NWT,
+  })
+  public productCondition: ProductConditionsEnum;
 
   @Column({ nullable: false })
   title: string;
