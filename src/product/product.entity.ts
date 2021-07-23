@@ -10,6 +10,8 @@ import { AbstractEntity } from '../common/abstract.entity';
 import { ProductDto } from './dto/ProductDto';
 import { UserEntity } from '../user/user.entity';
 import { ProductConditionsEnum } from '../enums/product-conditions.enum';
+import { SwapStatusesEnum } from '../enums/swap-statuses.enum';
+import { ProductStatusEnum } from '../enums/product-status.enum';
 
 @Entity({ name: 'product' })
 export class ProductEntity extends AbstractEntity<ProductDto> {
@@ -47,6 +49,13 @@ export class ProductEntity extends AbstractEntity<ProductDto> {
 
   @Column('text', { nullable: true, array: true })
   images: string[];
+
+  @Column({
+    type: 'enum',
+    enum: ProductStatusEnum,
+    default: ProductStatusEnum.NOT_SWAPPED,
+  })
+  public status: ProductStatusEnum;
 
   @CreateDateColumn({
     type: 'timestamp',
