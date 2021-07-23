@@ -9,6 +9,7 @@ import { SharedModule } from './shared/shared.module';
 import { ProductModule } from './product/product.module';
 import { MessageModule } from './message/message.module';
 import { SwapModule } from './swap/swap.module';
+import { AppGateway } from './gateway/app.gateway';
 
 @Module({
   imports: [
@@ -23,7 +24,7 @@ import { SwapModule } from './swap/swap.module';
       username: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
-      entities: ["dist/**/*.entity{.ts,.js}"],
+      entities: ['dist/**/*.entity{.ts,.js}'],
       synchronize: true,
       autoLoadEntities: true,
     }),
@@ -36,6 +37,6 @@ import { SwapModule } from './swap/swap.module';
     SwapModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [AppGateway],
 })
 export class AppModule {}

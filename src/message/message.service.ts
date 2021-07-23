@@ -10,12 +10,15 @@ import { MessageDto } from './dto/MessageDto';
 import { MessageEntity } from './message.entity';
 import { UserRepository } from '../user/user.repository';
 import { MessageRepository } from './message.repository';
+import { AppGateway } from '../gateway/app.gateway';
+import { MessageEventEnum } from '../common/constants/message-event';
 
 @Injectable()
 export class MessageService {
   constructor(
     public readonly userRepository: UserRepository,
     public readonly messageRepository: MessageRepository,
+    public readonly appGateway: AppGateway,
   ) {}
   async create(
     user: UserEntity,
@@ -34,15 +37,13 @@ export class MessageService {
 
     const message = await this.messageRepository.save(messageModel);
     const messageDto = message.toDto();
-    // Send socket event to all board members with newly created message as data
-    // this.boardGateway.boardcastToBoardId(
-    //   null,
-    //   BoardMessageEventEnum.CREATE_MESSAGE,
-    //   {
-    //     boardId: createMessageDto.boardId,
-    //     data: messageDto,
-    //   },
-    // );
+    // Send socket event to created message
+    this.appGateway.broadcast(
+      null,
+      MessageEventEnum.CREATE_MESSAGE,
+      messageModel.message,
+      user,
+    );
 
     return messageDto;
   }

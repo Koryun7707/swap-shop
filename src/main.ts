@@ -7,6 +7,7 @@ import * as compression from 'compression';
 import * as RateLimit from 'express-rate-limit';
 import { setupSwagger } from './viveo-swagger';
 import { useContainer } from 'class-validator';
+import { RedisIoAdapter } from './adapters/redis.adapter';
 
 async function bootstrap() {
   const PORT = process.env.PORT || 5000;
@@ -20,6 +21,7 @@ async function bootstrap() {
   );
   app.use(compression());
   app.use(morgan('combined'));
+  app.useWebSocketAdapter(new RedisIoAdapter(app));
   app.useGlobalPipes(
     new ValidationPipe({
       // whitelist: true,
