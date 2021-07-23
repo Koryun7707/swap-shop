@@ -7,6 +7,7 @@ import { IFile } from '../interfaces/IFile';
 import { AwsS3Service } from '../shared/services/aws-s3.service';
 import { Brackets } from 'typeorm';
 import { UserRepository } from '../user/user.repository';
+import { ProductEntity } from './product.entity';
 
 @Injectable()
 export class ProductService {
@@ -15,6 +16,11 @@ export class ProductService {
     public readonly userRepository: UserRepository,
     public readonly awsS3Service: AwsS3Service,
   ) {}
+
+  async findProductById(productId: string): Promise<ProductEntity | undefined> {
+    return await this.productRepository.findOne({id: productId});
+  }
+
   async uploadProduct(
     user: UserEntity,
     uploadProductDto: UploadProductDto,
@@ -36,6 +42,7 @@ export class ProductService {
     const product = await this.productRepository.save(productModel);
     return product.toDto();
   }
+
   async getProducts(user: UserEntity): Promise<ProductDto[]> {
     const productsModel = await this.productRepository.find({
       where: {

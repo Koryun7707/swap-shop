@@ -1,7 +1,8 @@
-import { ApiProperty  } from '@nestjs/swagger';
+import { ApiProperty, ApiQuery } from '@nestjs/swagger';
 import { IsEnum, IsNotEmpty, IsOptional } from 'class-validator';
 import { ProductConditionsEnum } from '../../enums/product-conditions.enum';
 import { ApiModelProperty } from '@nestjs/swagger/dist/decorators/api-model-property.decorator';
+import { Query } from '@nestjs/common';
 
 export class UploadProductDto {
   @IsNotEmpty({ message: 'name must not be empty' })
@@ -25,11 +26,10 @@ export class UploadProductDto {
   description: string;
 
   @IsOptional()
-  @ApiProperty(
-{ enum: ProductConditionsEnum}
-  )
+  @ApiProperty({ enum: ProductConditionsEnum })
   @IsEnum(ProductConditionsEnum)
-  productCondition: ProductConditionsEnum;
+  // @ApiProperty({ enum: Object.keys(ProductConditionsEnum) })
+  public productCondition: ProductConditionsEnum;
 
   @IsNotEmpty({ message: 'title must not be empty' })
   @ApiProperty()
