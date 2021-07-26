@@ -75,6 +75,20 @@ export class AuthController {
     }
     return await this.userService.verifyUser(userVerifyDto);
   }
+  @Post('verifyCode')
+  @HttpCode(HttpStatus.OK)
+  async verifyCode(@Body() userVerifyDto: UserVerifyDto): Promise<boolean> {
+    const user = await this.userRepository.findOne({
+      email: userVerifyDto.email,
+    });
+    if (!user) {
+      throw new NotFoundException();
+    }
+    return await this.userService.checkVerifyCode(
+      userVerifyDto.email,
+      Number(userVerifyDto.code),
+    );
+  }
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async userLogin(
