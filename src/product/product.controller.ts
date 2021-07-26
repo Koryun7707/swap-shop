@@ -7,6 +7,7 @@ import {
   HttpStatus,
   Param,
   Post,
+  Put,
   Query,
   UploadedFiles,
   UseGuards,
@@ -21,6 +22,7 @@ import { UserEntity } from '../user/user.entity';
 import { ProductService } from './product.service';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { IFile } from '../interfaces/IFile';
+import { UpdateProductDto } from './dto/UpdateProductDto';
 
 @Controller('product')
 @ApiTags('product')
@@ -55,7 +57,6 @@ export class ProductController {
     return this.productService.getProducts(user);
   }
 
-
   @UseGuards(AuthGuard)
   @Get('all')
   @HttpCode(HttpStatus.OK)
@@ -66,9 +67,6 @@ export class ProductController {
   async getAllProducts(@AuthUser() user: UserEntity): Promise<ProductDto[]> {
     return this.productService.getAllProducts(user);
   }
-
-
-
   @UseGuards(AuthGuard)
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
@@ -83,7 +81,6 @@ export class ProductController {
     return this.productService.deleteProduct(user, id);
   }
 
-
   @UseGuards(AuthGuard)
   @Get('search')
   @HttpCode(HttpStatus.OK)
@@ -97,7 +94,20 @@ export class ProductController {
   ): Promise<ProductDto[]> {
     return this.productService.searchProduct(user, search);
   }
-
-
-
+  @UseGuards(AuthGuard)
+  @Put(':id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    type: UpdateProductDto,
+    description: 'update product',
+  })
+  @UseInterceptors(FilesInterceptor('files'))
+  async updateProduct(
+    @Param('id') id: string,
+    @AuthUser() user: UserEntity,
+    @Body() updateProductDto: UpdateProductDto,
+    @UploadedFiles() files: Array<IFile>,
+  ): Promise<ProductDto> {
+    return this.productService.updateProduct(user, id, updateProductDto, files);
+  }
 }
