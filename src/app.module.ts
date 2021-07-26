@@ -3,13 +3,13 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
-import { UserEntity } from './user/user.entity';
 import { MailModule } from './mail/mail.module';
 import { SharedModule } from './shared/shared.module';
 import { ProductModule } from './product/product.module';
 import { MessageModule } from './message/message.module';
 import { SwapModule } from './swap/swap.module';
 import { AppGateway } from './gateway/app.gateway';
+import { SaveProductModule } from './saveProduct/saveProduct.module';
 
 @Module({
   imports: [
@@ -35,6 +35,7 @@ import { AppGateway } from './gateway/app.gateway';
     ProductModule,
     MessageModule,
     SwapModule,
+    SaveProductModule,
   ],
   controllers: [],
   providers: [AppGateway],

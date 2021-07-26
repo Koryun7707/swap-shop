@@ -100,6 +100,7 @@ export class ProductService {
     }
     await this.productRepository.delete(id);
   }
+
   async searchProduct(
     user: UserEntity,
     search?: string,
