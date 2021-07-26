@@ -16,7 +16,7 @@ import { WsExceptionFilter } from '../common/filters/ws-exception.filter';
 import { MessageEventEnum } from '../common/constants/message-event';
 
 @UseFilters(new WsExceptionFilter())
-@WebSocketGateway({ namespace: '/board', transports: ['websocket'] })
+@WebSocketGateway({ namespace: '/message', transports: ['websocket'] })
 export class AppGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
