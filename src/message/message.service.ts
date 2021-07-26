@@ -38,12 +38,7 @@ export class MessageService {
     const message = await this.messageRepository.save(messageModel);
     const messageDto = message.toDto();
     // Send socket event to created message
-    this.appGateway.broadcast(
-      null,
-      MessageEventEnum.CREATE_MESSAGE,
-      messageModel.message,
-      user,
-    );
+    this.appGateway.create(null, messageModel.message, user);
 
     return messageDto;
   }
