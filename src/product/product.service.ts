@@ -18,19 +18,19 @@ export class ProductService {
   ) {}
 
   async findProductById(productId: string): Promise<ProductEntity | undefined> {
-    return await this.productRepository.findOne({id: productId});
+    return await this.productRepository.findOne({ id: productId });
   }
 
   async uploadProduct(
     user: UserEntity,
     uploadProductDto: UploadProductDto,
-    files: Array<IFile>,
+    files: Array<string>,
   ): Promise<ProductDto> {
     let images: string[];
     if (files.length) {
       images = await Promise.all(
         files.map(async (file): Promise<string> => {
-          return await this.awsS3Service.uploadImage(file);
+          return await this.awsS3Service.uploadImage(file, user);
         }),
       );
     }

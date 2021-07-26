@@ -23,6 +23,7 @@ import { IFile } from '../interfaces/IFile';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { BlockedUserDto } from "./dto/BlockedUserDto";
 import { UnBlockUserDto } from "./dto/UnBlockUserDto";
+import { UploadImageDto } from "./dto/UploadImageDto";
 
 @Controller('user')
 @ApiTags('user')
@@ -61,11 +62,10 @@ export class UserController {
   })
   @UseInterceptors(FileInterceptor('file'))
   async uploadImage(
-    @Param('type') typeUpload: string,
-    @UploadedFile() file: IFile,
+    @Body() uploadImageDto: UploadImageDto,
     @AuthUser() user: UserEntity,
   ): Promise<UserDto> {
-    return this.userService.uploadImage(typeUpload, file, user);
+    return this.userService.uploadImage(uploadImageDto.file, user);
   }
   @UseGuards(AuthGuard)
   @Post('blockUser')

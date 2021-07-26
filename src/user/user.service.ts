@@ -108,15 +108,14 @@ export class UserService {
   }
 
   async uploadImage(
-    type: string,
-    file: IFile,
+    file: string,
     user: UserEntity,
   ): Promise<UserDto> {
-    if (!file || !ValidatorService.isImage(file.mimetype)) {
-      throw new FileNotImageException();
-    }
+    // if (!file || !ValidatorService.isImage(file.mimetype)) {
+    //   throw new FileNotImageException();
+    // }
 
-    const path = await this.awsS3Service.uploadImage(file);
+    const path = await this.awsS3Service.uploadImage(file, user);
 
     await this.userRepository.update(
       {
