@@ -3,12 +3,12 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
-import { UserEntity } from './user/user.entity';
 import { MailModule } from './mail/mail.module';
 import { SharedModule } from './shared/shared.module';
 import { ProductModule } from './product/product.module';
 import { MessageModule } from './message/message.module';
 import { SwapModule } from './swap/swap.module';
+import { SaveProductModule } from './saveProduct/saveProduct.module';
 
 @Module({
   imports: [
@@ -23,7 +23,7 @@ import { SwapModule } from './swap/swap.module';
       username: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
-      entities: ["dist/**/*.entity{.ts,.js}"],
+      entities: ['dist/**/*.entity{.ts,.js}'],
       synchronize: true,
       autoLoadEntities: true,
     }),
@@ -34,6 +34,7 @@ import { SwapModule } from './swap/swap.module';
     ProductModule,
     MessageModule,
     SwapModule,
+    SaveProductModule,
   ],
   controllers: [],
   providers: [],

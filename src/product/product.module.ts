@@ -8,7 +8,7 @@ import { ProductExistsRule } from '../common/validators/product-exist.validation
 
 @Module({
   imports: [TypeOrmModule.forFeature([ProductRepository, UserRepository])],
-  providers: [ProductService,ProductExistsRule],
+  providers: [ProductService, ProductExistsRule],
   controllers: [ProductController],
 })
 export class ProductModule {}

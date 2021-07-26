@@ -6,12 +6,13 @@ import {
   HttpCode,
   HttpStatus,
   Param,
-  Post, Put,
+  Post,
+  Put,
   Query,
   UploadedFiles,
   UseGuards,
-  UseInterceptors
-} from "@nestjs/common";
+  UseInterceptors,
+} from '@nestjs/common';
 import { AuthGuard } from '../guards/auth.guard';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { UploadProductDto } from './dto/UploadProductDto';
