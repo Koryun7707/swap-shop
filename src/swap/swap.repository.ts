@@ -10,7 +10,7 @@ export class SwapRepository extends Repository<SwapEntity> {
       return await this
         .createQueryBuilder('swap')
         .where('swap.receiver = :userId', { userId })
-        .andWhere('swap.status = :status ', { userId , status: 'new' })
+        .andWhere('swap.status = :status ', {  status: 'new' })
         .getCount()
     }
 }

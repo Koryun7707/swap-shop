@@ -29,6 +29,7 @@ import { UpdateProductDto } from './dto/UpdateProductDto';
 @ApiBearerAuth()
 export class ProductController {
   constructor(public readonly productService: ProductService) {}
+
   @UseGuards(AuthGuard)
   @Post('')
   @HttpCode(HttpStatus.OK)
@@ -44,6 +45,7 @@ export class ProductController {
   ): Promise<ProductDto> {
     return this.productService.uploadProduct(user, uploadProductDto, files);
   }
+
   @UseGuards(AuthGuard)
   @Get('')
   @HttpCode(HttpStatus.OK)
@@ -54,6 +56,7 @@ export class ProductController {
   async getProducts(@AuthUser() user: UserEntity): Promise<ProductDto[]> {
     return this.productService.getProducts(user);
   }
+
   @UseGuards(AuthGuard)
   @Get('all')
   @HttpCode(HttpStatus.OK)
@@ -77,6 +80,7 @@ export class ProductController {
   ): Promise<void> {
     return this.productService.deleteProduct(user, id);
   }
+
   @UseGuards(AuthGuard)
   @Get('search')
   @HttpCode(HttpStatus.OK)

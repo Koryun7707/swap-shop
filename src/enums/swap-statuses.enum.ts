@@ -1,4 +1,5 @@
 export enum SwapStatusesEnum {
-    NEW        = "new",
-    SEEN       = "seen",
+    NEW            = "new",
+    SEEN           = "seen",
+    APPROVED       = "approved",
 }
