@@ -9,20 +9,20 @@ import {
 import { AbstractEntity } from '../common/abstract.entity';
 import { MessageDto } from './dto/MessageDto';
 import { UserEntity } from '../user/user.entity';
+import { GroupEntity } from '../group/group.entity';
 
 @Entity({ name: 'message' })
 export class MessageEntity extends AbstractEntity<MessageDto> {
+  @ManyToOne(() => GroupEntity, (group) => group.id)
+  @JoinColumn({ name: 'receiver' })
+  group: GroupEntity;
+
   @ManyToOne(() => UserEntity, (user) => user.id, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'sender', referencedColumnName: 'id' })
-  sender: string;
+  sender: UserEntity;
 
-  // @ManyToOne(type => User, user => user.userRoles)
-  // @JoinColumn({ name: "user_id", referencedColumnName: "id"})
-  // user: User;
-
-  @ManyToOne(() => UserEntity, (user) => user.id)
-  @JoinColumn({ name: 'receiver' })
-  receiver: string;
+  @Column('text', { nullable: true, array: true })
+  users: string[];
 
   @Column({ nullable: false })
   message: string;

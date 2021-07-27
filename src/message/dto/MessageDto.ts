@@ -4,21 +4,27 @@ import { ApiProperty } from '@nestjs/swagger';
 
 import { AbstractDto } from '../../common/dto/AbstractDto';
 import { MessageEntity } from '../message.entity';
+import { GroupEntity } from '../../group/group.entity';
+import { UserEntity } from '../../user/user.entity';
 
 export class MessageDto extends AbstractDto {
   @ApiProperty()
-  sender: string;
+  group: GroupEntity;
 
   @ApiProperty()
-  receiver: string;
+  sender: UserEntity;
+
+  @ApiProperty()
+  users: string[];
 
   @ApiProperty()
   message: string;
 
   constructor(messageEntity: MessageEntity) {
     super(messageEntity);
+    this.group = messageEntity.group;
     this.sender = messageEntity.sender;
-    this.receiver = messageEntity.receiver;
+    this.users = messageEntity.users;
     this.message = messageEntity.message;
   }
 }

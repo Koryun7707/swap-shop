@@ -30,9 +30,8 @@ export class MessageService {
       throw new NotFoundException('User not found');
     }
     const messageModel = new MessageEntity();
-    messageModel.sender = user.id;
+    messageModel.sender = user;
     messageModel.message = createMessageDto.message;
-    messageModel.receiver = createMessageDto.receiver;
 
     const message = await this.messageRepository.save(messageModel);
     const messageDto = message.toDto();
@@ -70,7 +69,7 @@ export class MessageService {
   async delete(id: string, user: UserEntity): Promise<void> {
     const message = await this.messageRepository.findOne({
       id,
-      sender: user.id,
+      sender: user,
     });
     if (!message) {
       throw new NotFoundException();

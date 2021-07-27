@@ -2,13 +2,10 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn,
-  ManyToOne,
   UpdateDateColumn,
 } from 'typeorm';
 import { AbstractEntity } from '../common/abstract.entity';
 import { GroupDto } from './dto/GroupDto';
-import { UserEntity } from '../user/user.entity';
 import { GroupEnum } from '../enums/group.enum';
 
 @Entity({ name: 'group' })
