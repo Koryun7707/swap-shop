@@ -34,7 +34,6 @@ export class ProductController {
     type: UploadProductDto,
     description: 'upload product',
   })
-  @UseInterceptors(FilesInterceptor('files'))
   async uploadProduct(
     @AuthUser() user: UserEntity,
     @Body() uploadProductDto: UploadProductDto,
