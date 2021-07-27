@@ -33,8 +33,8 @@ async function bootstrap() {
   );
   setupSwagger(app);
   useContainer(app.select(AppModule), { fallbackOnErrors: true }); //for custom validation rules
-  app.use(bodyParser.json({limit: '50mb'}));
-  app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
+  app.use(bodyParser.json({ limit: '50mb' }));
+  app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
   app.enableCors();
   await app.listen(PORT, () => {
     console.log(`Server has been started on port ${PORT}`);

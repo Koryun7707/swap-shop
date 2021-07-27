@@ -9,9 +9,7 @@ import {
   Post,
   Put,
   Query,
-  UploadedFiles,
   UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
 import { AuthGuard } from '../guards/auth.guard';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
@@ -20,8 +18,6 @@ import { ProductDto } from './dto/ProductDto';
 import { AuthUser } from '../decorators/auth-user.decorator';
 import { UserEntity } from '../user/user.entity';
 import { ProductService } from './product.service';
-import { FilesInterceptor } from '@nestjs/platform-express';
-import { IFile } from '../interfaces/IFile';
 import { UpdateProductDto } from './dto/UpdateProductDto';
 
 @Controller('product')
@@ -40,7 +36,6 @@ export class ProductController {
   async uploadProduct(
     @AuthUser() user: UserEntity,
     @Body() uploadProductDto: UploadProductDto,
-    // @UploadedFiles() files: Array<string>,
   ): Promise<ProductDto> {
     return this.productService.uploadProduct(user, uploadProductDto);
   }
@@ -100,13 +95,11 @@ export class ProductController {
     type: UpdateProductDto,
     description: 'update product',
   })
-  @UseInterceptors(FilesInterceptor('files'))
   async updateProduct(
     @Param('id') id: string,
     @AuthUser() user: UserEntity,
     @Body() updateProductDto: UpdateProductDto,
-    @UploadedFiles() files: Array<IFile>,
   ): Promise<ProductDto> {
-    return this.productService.updateProduct(user, id, updateProductDto, files);
+    return this.productService.updateProduct(user, id, updateProductDto);
   }
 }
