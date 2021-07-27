@@ -11,7 +11,6 @@ import { MessageEntity } from './message.entity';
 import { UserRepository } from '../user/user.repository';
 import { MessageRepository } from './message.repository';
 import { AppGateway } from '../gateway/app.gateway';
-import { MessageEventEnum } from '../common/constants/message-event';
 
 @Injectable()
 export class MessageService {
@@ -38,7 +37,7 @@ export class MessageService {
     const message = await this.messageRepository.save(messageModel);
     const messageDto = message.toDto();
     // Send socket event to created message
-    this.appGateway.create(null, messageModel.message, user);
+    await this.appGateway.create(null, messageModel.message, user);
 
     return messageDto;
   }
