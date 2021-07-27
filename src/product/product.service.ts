@@ -25,20 +25,19 @@ export class ProductService {
   async uploadProduct(
     user: UserEntity,
     uploadProductDto: UploadProductDto,
-    files: Array<IFile>,
   ): Promise<ProductDto> {
-    let images: string[];
-    if (files.length) {
-      images = await Promise.all(
-        files.map(async (file): Promise<string> => {
-          return await this.awsS3Service.uploadImage(file);
+    let imagesModel: string[];
+    if (uploadProductDto.images && uploadProductDto.images.length) {
+      imagesModel = await Promise.all(
+        uploadProductDto.images.map(async (file): Promise<string> => {
+          return await this.awsS3Service.uploadImage(file, user);
         }),
       );
     }
     const productModel = await this.productRepository.create({
       ...uploadProductDto,
       user: user.id,
-      images,
+      images: imagesModel,
     });
     const product = await this.productRepository.save(productModel);
     return product.toDto();
@@ -47,22 +46,21 @@ export class ProductService {
     user: UserEntity,
     id: string,
     updateProductDto: UpdateProductDto,
-    files: Array<IFile>,
   ): Promise<ProductDto> {
     const product = await this.productRepository.findOne(id);
     if (!product) {
       throw new NotFoundException();
     }
-    let images: string[];
-    if (files && files.length) {
-      images = await Promise.all(
-        files.map(async (file): Promise<string> => {
-          return await this.awsS3Service.uploadImage(file);
+    let imagesModel: string[];
+    if (updateProductDto.images.length) {
+      imagesModel = await Promise.all(
+        updateProductDto.images.map(async (file): Promise<string> => {
+          return await this.awsS3Service.uploadImage(file, user);
         }),
       );
     }
-    if (images && images.length) {
-      updateProductDto.images = images;
+    if (imagesModel && imagesModel.length) {
+      updateProductDto.images = imagesModel;
     }
     await this.productRepository.update(id, updateProductDto);
     const updateProduct = await this.productRepository.findOne(id);

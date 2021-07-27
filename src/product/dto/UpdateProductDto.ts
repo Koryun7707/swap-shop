@@ -1,5 +1,5 @@
-import { ApiProperty, ApiQuery } from '@nestjs/swagger';
-import { IsEnum, IsNotEmpty, IsOptional } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsEnum, IsOptional } from 'class-validator';
 import { ProductConditionsEnum } from '../../enums/product-conditions.enum';
 
 export class UpdateProductDto {
@@ -23,7 +23,6 @@ export class UpdateProductDto {
   @ApiProperty()
   description: string;
 
-  @IsOptional()
   @IsOptional()
   @IsEnum(ProductConditionsEnum)
   public productCondition: ProductConditionsEnum;

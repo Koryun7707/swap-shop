@@ -2,7 +2,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNotEmpty, IsOptional, Validate } from 'class-validator';
 import { ProductConditionsEnum } from '../../enums/product-conditions.enum';
 import { ProductStatusEnum } from '../../enums/product-status.enum';
-import { UserExistsRule } from '../../common/validators/user-exist.validation';
 import { LocationExistsRule } from '../../common/validators/swap-location.validation';
 
 export class UploadProductDto {
@@ -48,5 +47,4 @@ export class UploadProductDto {
   @ApiProperty({ enum: ProductStatusEnum })
   @IsEnum(ProductStatusEnum)
   public status: ProductStatusEnum;
-
 }

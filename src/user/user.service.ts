@@ -11,9 +11,6 @@ import { UserDto } from './dto/UserDto';
 import * as bcrypt from 'bcrypt';
 import { FindConditions } from 'typeorm';
 import { UserUpdateDto } from './dto/UserUpdateDto';
-import { IFile } from '../interfaces/IFile';
-import { ValidatorService } from '../shared/services/validator.service';
-import { FileNotImageException } from '../exceptions/file-not-image.exception';
 import { AwsS3Service } from '../shared/services/aws-s3.service';
 
 @Injectable()
@@ -107,16 +104,8 @@ export class UserService {
     return new UserDto(updateUser);
   }
 
-  async uploadImage(
-    type: string,
-    file: IFile,
-    user: UserEntity,
-  ): Promise<UserDto> {
-    if (!file || !ValidatorService.isImage(file.mimetype)) {
-      throw new FileNotImageException();
-    }
-
-    const path = await this.awsS3Service.uploadImage(file);
+  async uploadImage(file: string, user: UserEntity): Promise<UserDto> {
+    const path = await this.awsS3Service.uploadImage(file, user);
 
     await this.userRepository.update(
       {
