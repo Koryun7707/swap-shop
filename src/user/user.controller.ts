@@ -60,7 +60,7 @@ export class UserController {
   @ApiOkResponse({
     description: 'upload image',
   })
-  @UseInterceptors(FileInterceptor('file'))
+  // @UseInterceptors(FileInterceptor('file'))
   async uploadImage(
     @Body() uploadImageDto: UploadImageDto,
     @AuthUser() user: UserEntity,

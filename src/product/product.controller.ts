@@ -37,9 +37,9 @@ export class ProductController {
   async uploadProduct(
     @AuthUser() user: UserEntity,
     @Body() uploadProductDto: UploadProductDto,
-    @UploadedFiles() files: Array<string>,
+    // @UploadedFiles() files: Array<string>,
   ): Promise<ProductDto> {
-    return this.productService.uploadProduct(user, uploadProductDto, files);
+    return this.productService.uploadProduct(user, uploadProductDto);
   }
   @UseGuards(AuthGuard)
   @Get('')

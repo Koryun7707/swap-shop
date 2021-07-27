@@ -114,6 +114,8 @@ export class UserService {
     // if (!file || !ValidatorService.isImage(file.mimetype)) {
     //   throw new FileNotImageException();
     // }
+    console.log(file);
+    
 
     const path = await this.awsS3Service.uploadImage(file, user);
 

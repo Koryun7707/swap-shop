@@ -24,12 +24,11 @@ export class ProductService {
   async uploadProduct(
     user: UserEntity,
     uploadProductDto: UploadProductDto,
-    files: Array<string>,
   ): Promise<ProductDto> {
-    let images: string[];
-    if (files.length) {
-      images = await Promise.all(
-        files.map(async (file): Promise<string> => {
+    let imagesModel: string[];
+    if (uploadProductDto.images.length) {
+      imagesModel = await Promise.all(
+        uploadProductDto.images.map(async (file): Promise<string> => {
           return await this.awsS3Service.uploadImage(file, user);
         }),
       );
@@ -37,7 +36,7 @@ export class ProductService {
     const productModel = await this.productRepository.create({
       ...uploadProductDto,
       user: user.id,
-      images,
+      images:imagesModel,
     });
     const product = await this.productRepository.save(productModel);
     return product.toDto();
