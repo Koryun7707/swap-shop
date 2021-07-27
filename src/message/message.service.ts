@@ -11,11 +11,16 @@ import { MessageEntity } from './message.entity';
 import { UserRepository } from '../user/user.repository';
 import { MessageRepository } from './message.repository';
 import { AppGateway } from '../gateway/app.gateway';
+import { GroupRepository } from '../group/group.repository';
+import { GroupEntity } from '../group/group.entity';
+import { GroupUserRepository } from "../group_user/groupUser.repository";
 
 @Injectable()
 export class MessageService {
   constructor(
     public readonly userRepository: UserRepository,
+    public readonly groupRepository: GroupRepository,
+    public readonly groupUserRepository: GroupUserRepository,
     public readonly messageRepository: MessageRepository,
     public readonly appGateway: AppGateway,
   ) {}
@@ -24,17 +29,28 @@ export class MessageService {
     createMessageDto: CreateMessageDto,
   ): Promise<MessageDto> {
     const receiver = await this.userRepository.findOne({
-      id: createMessageDto.receiver,
+      id: createMessageDto.receiverId,
     });
     if (!receiver) {
       throw new NotFoundException('User not found');
     }
+    let group: GroupEntity;
+    if (!createMessageDto.groupId) {
+      const groupModel = await this.groupRepository.create({});
+      group = await this.groupRepository.save(groupModel);
+    } else {
+      group = await this.groupRepository.findOne(createMessageDto.groupId);
+    }
+
     const messageModel = new MessageEntity();
     messageModel.sender = user;
     messageModel.message = createMessageDto.message;
+    messageModel.users = [receiver.id, user.id];
+    messageModel.group = group;
 
     const message = await this.messageRepository.save(messageModel);
     const messageDto = message.toDto();
+    const groupUser = await this.
     // Send socket event to created message
     await this.appGateway.create(null, messageModel.message, user);
 
