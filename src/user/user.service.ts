@@ -37,7 +37,7 @@ export class UserService {
 
   /**
    * generate hash from password or string
-   * @param {string} password
+   * @param {string} password 
    * @returns {string}
    */
   public generateHash(password: string): string {

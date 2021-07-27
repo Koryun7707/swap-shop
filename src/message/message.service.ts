@@ -13,7 +13,7 @@ import { MessageRepository } from './message.repository';
 import { AppGateway } from '../gateway/app.gateway';
 import { GroupRepository } from '../group/group.repository';
 import { GroupEntity } from '../group/group.entity';
-import { GroupUserRepository } from "../group_user/groupUser.repository";
+import { GroupUserRepository } from '../group_user/groupUser.repository';
 
 @Injectable()
 export class MessageService {
@@ -50,9 +50,14 @@ export class MessageService {
 
     const message = await this.messageRepository.save(messageModel);
     const messageDto = message.toDto();
-    const groupUser = await this.
+    const groupUserModel = await this.groupUserRepository.create({
+      group,
+      user,
+    });
+    await this.groupUserRepository.save(groupUserModel);
     // Send socket event to created message
-    await this.appGateway.create(null, messageModel.message, user);
+    const room = group.id;
+    await this.appGateway.create(null, messageDto, room);
 
     return messageDto;
   }

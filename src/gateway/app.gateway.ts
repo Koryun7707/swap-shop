@@ -30,16 +30,16 @@ export class AppGateway
   @SubscribeMessage(MessageEventEnum.CREATE_MESSAGE)
   create(
     @ConnectedSocket() client: Socket,
-    @MessageBody() message: string,
-    @AuthUser() user: UserEntity,
+    @MessageBody() message: any,
+    room: string,
   ): void {
-    this.broadcast(client, MessageEventEnum.CREATE_MESSAGE, message, user);
+    this.broadcast(client, MessageEventEnum.CREATE_MESSAGE, message, room);
   }
-  broadcast(socket: Socket, eventName: string, message: string, user) {
+  broadcast(socket: Socket, eventName: string, message: any, room) {
     if (socket) {
-      socket.broadcast.to(user.id).emit(eventName, message);
+      socket.broadcast.to(room).emit(eventName, message);
     } else {
-      this.server.to(user.id).emit(eventName, message);
+      this.server.to(room).emit(eventName, message);
     }
   }
   @SubscribeMessage('joinRoom')
