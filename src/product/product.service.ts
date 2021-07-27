@@ -8,6 +8,7 @@ import { AwsS3Service } from '../shared/services/aws-s3.service';
 import { Brackets } from 'typeorm';
 import { UserRepository } from '../user/user.repository';
 import { ProductEntity } from './product.entity';
+import { UpdateProductDto } from './dto/UpdateProductDto';
 
 @Injectable()
 export class ProductService {
@@ -41,7 +42,32 @@ export class ProductService {
     const product = await this.productRepository.save(productModel);
     return product.toDto();
   }
+  async updateProduct(
+    user: UserEntity,
+    id: string,
+    updateProductDto: UpdateProductDto,
+    files: Array<IFile>,
+  ): Promise<ProductDto> {
+    const product = await this.productRepository.findOne(id);
+    if (!product) {
+      throw new NotFoundException();
+    }
+    let images: string[];
+    if (files && files.length) {
+      images = await Promise.all(
+        files.map(async (file): Promise<string> => {
+          return await this.awsS3Service.uploadImage(file);
+        }),
+      );
+    }
+    if (images && images.length) {
+      updateProductDto.images = images;
+    }
+    await this.productRepository.update(id, updateProductDto);
+    const updateProduct = await this.productRepository.findOne(id);
 
+    return updateProduct.toDto();
+  }
   async getProducts(user: UserEntity): Promise<ProductDto[]> {
     const productsModel = await this.productRepository.find({
       where: {
@@ -73,6 +99,7 @@ export class ProductService {
     }
     await this.productRepository.delete(id);
   }
+
   async searchProduct(
     user: UserEntity,
     search?: string,
