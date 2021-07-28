@@ -4,13 +4,11 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  Param,
   Post,
-  Put, Query,
-  UploadedFile,
+  Put,
+  Query,
   UseGuards,
-  UseInterceptors
-} from "@nestjs/common";
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { AuthGuard } from '../guards/auth.guard';
 import { AuthUser } from '../decorators/auth-user.decorator';
@@ -19,11 +17,9 @@ import { UserDto } from './dto/UserDto';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../guards/jwt.auth.guard';
 import { UserUpdateDto } from './dto/UserUpdateDto';
-import { IFile } from '../interfaces/IFile';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { BlockedUserDto } from "./dto/BlockedUserDto";
-import { UnBlockUserDto } from "./dto/UnBlockUserDto";
-import { UploadImageDto } from "./dto/UploadImageDto";
+import { BlockedUserDto } from './dto/BlockedUserDto';
+import { UnBlockUserDto } from './dto/UnBlockUserDto';
+import { UploadImageDto } from './dto/UploadImageDto';
 
 @Controller('user')
 @ApiTags('user')

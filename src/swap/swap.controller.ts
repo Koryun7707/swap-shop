@@ -24,7 +24,6 @@ import { CreateSwapDto } from './dto/CreateSwapDto';
 import { SwapEntity } from './swap.entity';
 import { ApprovedSwapDto } from './dto/ApprovedSwapDto';
 import { ApprovedSwapNotificationsDto } from './dto/ApprovedSwapNotificationsDto';
-import { query } from 'express';
 
 @Controller('swap')
 @ApiTags('swap')
