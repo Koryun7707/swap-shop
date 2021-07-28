@@ -5,9 +5,9 @@ import { IsEnum, IsNotEmpty, IsOptional, Validate } from 'class-validator';
 import { UserExistsRule } from '../../common/validators/user-exist.validation';
 import { ProductExistsRule } from '../../common/validators/product-exist.validation';
 import { SwapStatusesEnum } from '../../enums/swap-statuses.enum';
+import { LocationExistsRule } from '../../common/validators/swap-location.validation';
 
 export class CreateSwapDto {
-
   @ApiPropertyOptional()
   @IsNotEmpty()
   @Validate(UserExistsRule)
@@ -23,8 +23,9 @@ export class CreateSwapDto {
   @Validate(ProductExistsRule)
   receiverProduct: string;
 
-  @ApiPropertyOptional()
-  @IsNotEmpty()
+  @IsOptional()
+  @ApiProperty()
+  @Validate(LocationExistsRule)
   dropOff: string[];
 
   @IsOptional()

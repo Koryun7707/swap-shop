@@ -1,10 +1,16 @@
 import {
   BadRequestException,
   Body,
-  Controller, Delete, Get,
+  Controller,
+  Delete,
+  Get,
   HttpCode,
-  HttpStatus, Param, ParseUUIDPipe,
-  Post, Query, Res,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Query,
+  Res,
   UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
@@ -36,8 +42,8 @@ export class SwapController {
   async swapRequest(
     @AuthUser() user: UserEntity,
     @Body() createSwapDto: CreateSwapDto,
-  ): Promise<Promise<SwapEntity> | BadRequestException> {
-    return this.swapService.saveSwapRequest(user,createSwapDto)
+  ): Promise<SwapEntity> {
+    return this.swapService.saveSwapRequest(user, createSwapDto);
   }
 
   @UseGuards(AuthGuard)
@@ -46,12 +52,9 @@ export class SwapController {
   @ApiOkResponse({
     description: 'Get new notifications',
   })
-  async swapNotifications(
-    @AuthUser() user: UserEntity
-  ){
-    return await this.swapService.getSwapNotifications(user)
+  async swapNotifications(@AuthUser() user: UserEntity) {
+    return await this.swapService.getSwapNotifications(user);
   }
-
 
   @UseGuards(AuthGuard)
   @Delete(':id')
@@ -62,10 +65,9 @@ export class SwapController {
   async swapDelete(
     @AuthUser() user: UserEntity,
     @Param('id') id: string,
-  ):Promise<object>{
-    return await this.swapService.deleteSwapRequest(user,id)
+  ): Promise<object> {
+    return await this.swapService.deleteSwapRequest(user, id);
   }
-
 
   @UseGuards(AuthGuard)
   @Post('approve')
@@ -75,11 +77,10 @@ export class SwapController {
   })
   async swapApprove(
     @AuthUser() user: UserEntity,
-    @Body() approvedSwapDto : ApprovedSwapDto,
-  ):Promise<object>{
-    return await this.swapService.approveSwapRequest(user,approvedSwapDto)
+    @Body() approvedSwapDto: ApprovedSwapDto,
+  ): Promise<object> {
+    return await this.swapService.approveSwapRequest(user, approvedSwapDto);
   }
-
 
   @UseGuards(AuthGuard)
   @Post('approved-notifications')
@@ -89,11 +90,13 @@ export class SwapController {
   })
   async swapApprovedNotifications(
     @AuthUser() user: UserEntity,
-    @Body() approvedSwapNotificationsDto : ApprovedSwapNotificationsDto
-  ):Promise<object>{
-    return await this.swapService.getApprovedNotifications( user , approvedSwapNotificationsDto )
+    @Body() approvedSwapNotificationsDto: ApprovedSwapNotificationsDto,
+  ): Promise<object> {
+    return await this.swapService.getApprovedNotifications(
+      user,
+      approvedSwapNotificationsDto,
+    );
   }
-
 
   @UseGuards(AuthGuard)
   @Get('seen-notification')
@@ -103,9 +106,8 @@ export class SwapController {
   })
   async swapMakeSeenNotification(
     @AuthUser() user: UserEntity,
-    @Query('id',new ParseUUIDPipe()) uuid : string
-  ):Promise<object>{
-    return await this.swapService.makeSeenNotification( user , uuid  )
+    @Query('id', new ParseUUIDPipe()) uuid: string,
+  ): Promise<object> {
+    return await this.swapService.makeSeenNotification(user, uuid);
   }
-
 }

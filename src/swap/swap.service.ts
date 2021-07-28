@@ -20,14 +20,14 @@ export class SwapService {
   async saveSwapRequest(
     user: UserEntity,
     createSwapDto: CreateSwapDto,
-  ): Promise<Promise<SwapEntity> | BadRequestException> {
+  ): Promise<SwapEntity> {
     const validSenderProduct =
       await this.productRepository.findValidUserProduct(
         user.id,
         createSwapDto.senderProduct,
       );
     if (!validSenderProduct) {
-      return new BadRequestException('Invalid sender product');
+      throw new BadRequestException('Invalid sender product');
     }
     const validReceiverProduct =
       await this.productRepository.findValidUserProduct(
@@ -35,9 +35,20 @@ export class SwapService {
         createSwapDto.receiverProduct,
       );
     if (!validReceiverProduct) {
-      return new BadRequestException('Invalid receiver product');
+      throw new BadRequestException('Invalid receiver product');
     }
-
+    const swap = await this.swapRepository.findOne({
+      where: {
+        sender: user.id,
+        senderProduct: createSwapDto.senderProduct,
+        receiver: createSwapDto.receiver,
+        receiverProduct: createSwapDto.receiverProduct,
+        status: Not(SwapStatusesEnum.APPROVED),
+      },
+    });
+    if (swap) {
+      throw new BadRequestException('You have already requested a swap.');
+    }
     const swapModel = await this.swapRepository.create({
       ...createSwapDto,
       sender: user.id,
