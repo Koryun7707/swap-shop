@@ -10,7 +10,6 @@ import { AbstractEntity } from '../common/abstract.entity';
 import { ProductDto } from './dto/ProductDto';
 import { UserEntity } from '../user/user.entity';
 import { ProductConditionsEnum } from '../enums/product-conditions.enum';
-import { SwapStatusesEnum } from '../enums/swap-statuses.enum';
 import { ProductStatusEnum } from '../enums/product-status.enum';
 
 @Entity({ name: 'product' })

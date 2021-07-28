@@ -3,19 +3,19 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
-  ManyToOne, PrimaryGeneratedColumn,
+  ManyToMany,
+  ManyToOne,
   UpdateDateColumn,
+  JoinTable,
 } from 'typeorm';
 import { UserEntity } from '../user/user.entity';
 import { ProductEntity } from '../product/product.entity';
 import { AbstractEntity } from '../common/abstract.entity';
 import { SwapDto } from './dto/SwapDto';
-import { ProductConditionsEnum } from '../enums/product-conditions.enum';
 import { SwapStatusesEnum } from '../enums/swap-statuses.enum';
 
 @Entity({ name: 'swap' })
 export class SwapEntity extends AbstractEntity<SwapDto> {
-
   @ManyToOne(() => UserEntity, (user) => user.id, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'sender' })
   sender: string;
@@ -24,13 +24,13 @@ export class SwapEntity extends AbstractEntity<SwapDto> {
   @JoinColumn({ name: 'receiver' })
   receiver: string;
 
-  @ManyToOne(() => ProductEntity, (product) => product.id, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'senderProduct' })
-  senderProduct: string;
+  @ManyToMany(() => ProductEntity)
+  @JoinTable()
+  senderProduct: ProductEntity[];
 
-  @ManyToOne(() => ProductEntity, (product) => product.id, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'receiverProduct' })
-  receiverProduct: string;
+  @ManyToMany(() => ProductEntity)
+  @JoinTable()
+  receiverProduct: ProductEntity[];
 
   @Column({ type: 'simple-array', nullable: false })
   dropOff: string[];

@@ -9,6 +9,7 @@ import { Not } from 'typeorm';
 import { SwapStatusesEnum } from '../enums/swap-statuses.enum';
 import { ProductStatusEnum } from '../enums/product-status.enum';
 import { ApprovedSwapNotificationsDto } from './dto/ApprovedSwapNotificationsDto';
+import { ProductEntity } from "../product/product.entity";
 
 @Injectable()
 export class SwapService {
@@ -21,28 +22,26 @@ export class SwapService {
     user: UserEntity,
     createSwapDto: CreateSwapDto,
   ): Promise<SwapEntity> {
-    const validSenderProduct =
-      await this.productRepository.findValidUserProduct(
-        user.id,
-        createSwapDto.senderProduct,
-      );
-    if (!validSenderProduct) {
+    const senderProduct = await this.productRepository.checkProductsUser(
+      user.id,
+      createSwapDto.senderProduct,
+    );
+    if (!senderProduct.length) {
       throw new BadRequestException('Invalid sender product');
     }
-    const validReceiverProduct =
-      await this.productRepository.findValidUserProduct(
-        createSwapDto.receiver,
-        createSwapDto.receiverProduct,
-      );
-    if (!validReceiverProduct) {
+    const receiverProduct = await this.productRepository.checkProductsUser(
+      createSwapDto.receiver,
+      createSwapDto.receiverProduct,
+    );
+    if (!receiverProduct.length) {
       throw new BadRequestException('Invalid receiver product');
     }
     const swap = await this.swapRepository.findOne({
       where: {
         sender: user.id,
-        senderProduct: createSwapDto.senderProduct,
+        senderProduct,
         receiver: createSwapDto.receiver,
-        receiverProduct: createSwapDto.receiverProduct,
+        receiverProduct,
         status: Not(SwapStatusesEnum.APPROVED),
       },
     });
@@ -51,6 +50,8 @@ export class SwapService {
     }
     const swapModel = await this.swapRepository.create({
       ...createSwapDto,
+      senderProduct,
+      receiverProduct,
       sender: user.id,
     });
     return await this.swapRepository.save(swapModel);
