@@ -68,13 +68,14 @@ export class ProductService {
     return updateProduct.toDto();
   }
   async getProducts(user: UserEntity): Promise<ProductDto[]> {
-    const productsModel = await this.productRepository.find({
-      where: {
-        user: user.id,
-      },
-      relations: ['user'],
-    });
-    return productsModel.map((product) => product.toDto());
+    const productsModel = await this.productRepository
+      .createQueryBuilder('product')
+      .where('product.user = :userId', { userId: user.id })
+      .leftJoinAndSelect('product.user', 'user')
+      .select(['product', 'user.profilePicture']);
+    const result = await productsModel.getMany();
+
+    return result.map((product) => product.toDto());
   }
   async getAllProducts(user: UserEntity): Promise<ProductDto[]> {
     return this._getNonBlockUsersProducts(user);
@@ -127,7 +128,10 @@ export class ProductService {
     user: UserEntity,
   ): Promise<ProductDto[]> {
     const userModel = await this.userRepository.findOne({ id: user.id });
-    const product = await this.productRepository.createQueryBuilder('product');
+    const product = await this.productRepository
+      .createQueryBuilder('product')
+      .leftJoinAndSelect('product.user', 'user')
+      .select(['product', 'user.profilePicture']);
     if (userModel.blockedBy && userModel.blockedBy.length) {
       product.where('product.user NOT IN (:...blockedBy)', {
         blockedBy: userModel.blockedBy,
