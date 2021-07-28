@@ -10,8 +10,6 @@ import {
 } from '@nestjs/websockets';
 import { Logger, UseFilters } from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
-import { AuthUser } from '../decorators/auth-user.decorator';
-import { UserEntity } from '../user/user.entity';
 import { WsExceptionFilter } from '../common/filters/ws-exception.filter';
 import { MessageEventEnum } from '../common/constants/message-event';
 
@@ -35,27 +33,43 @@ export class AppGateway
   ): void {
     this.broadcast(client, MessageEventEnum.CREATE_MESSAGE, message, room);
   }
-  broadcast(socket: Socket, eventName: string, message: any, room) {
+  @SubscribeMessage(MessageEventEnum.CREATE_MESSAGE)
+  update(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() message: any,
+    room: string,
+  ): void {
+    this.broadcast(client, MessageEventEnum.UPDATE_MESSAGE, message, room);
+  }
+  @SubscribeMessage(MessageEventEnum.DELETE_MESSAGE)
+  delete(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() message: any,
+    room: string,
+  ): void {
+    this.broadcast(client, MessageEventEnum.DELETE_MESSAGE, message, room);
+  }
+  broadcast(socket: Socket, eventName: string, message: any, room: string) {
     if (socket) {
       socket.broadcast.to(room).emit(eventName, message);
     } else {
       this.server.to(room).emit(eventName, message);
     }
   }
-  @SubscribeMessage('joinRoom')
+  @SubscribeMessage(MessageEventEnum.JOIN_ROOM)
   public joinRoom(client: Socket, room: string): void {
     client.join(room);
-    client.emit('joinedRoom', room);
+    client.emit(MessageEventEnum.JOIN_ROOM, room);
   }
 
-  @SubscribeMessage('leaveRoom')
+  @SubscribeMessage(MessageEventEnum.LEAVE_ROOM)
   public leaveRoom(client: Socket, room: string): void {
     client.leave(room);
-    client.emit('leftRoom', room);
+    client.emit(MessageEventEnum.LEAVE_ROOM, room);
   }
 
   afterInit(server: Server): void {
-    return this.logger.log('Init');
+    return this.logger.log('Init Socket');
   }
 
   handleConnection(client: Socket): void {
