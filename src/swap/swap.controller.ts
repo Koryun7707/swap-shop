@@ -77,7 +77,7 @@ export class SwapController {
   async swapApprove(
     @AuthUser() user: UserEntity,
     @Body() approvedSwapDto: ApprovedSwapDto,
-  ): Promise<object> {
+  ): Promise<SwapEntity> {
     return await this.swapService.approveSwapRequest(user, approvedSwapDto);
   }
 

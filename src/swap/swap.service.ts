@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { UserEntity } from '../user/user.entity';
 import { CreateSwapDto } from './dto/CreateSwapDto';
 import { SwapRepository } from './swap.repository';
@@ -61,8 +65,16 @@ export class SwapService {
         userId: user.id,
         status: SwapStatusesEnum.NEW,
       })
-      .select(['swap', '_sender.firstName', '_sender.profilePicture'])
+      .select([
+        'swap',
+        '_sender.firstName',
+        '_sender.profilePicture',
+        '_senderProduct',
+        '_receiverProduct',
+      ])
       .leftJoin('swap.sender', '_sender')
+      .leftJoin('swap.senderProduct', '_senderProduct')
+      .leftJoin('swap.receiverProduct', `_receiverProduct`)
       .getMany();
   }
 
@@ -84,39 +96,38 @@ export class SwapService {
   async approveSwapRequest(
     user: UserEntity,
     approvedSwapDto: ApprovedSwapDto,
-  ): Promise<object> {
+  ): Promise<SwapEntity> {
     const swapRequest = await this.swapRepository.findOne({
       where: { id: approvedSwapDto.id, status: Not(SwapStatusesEnum.APPROVED) },
       relations: ['senderProduct', 'receiverProduct'],
     });
-
-    if (swapRequest) {
-      try {
-        swapRequest.status = SwapStatusesEnum.APPROVED;
-        swapRequest.dropOff = [approvedSwapDto.dropOff];
-
-        await this.swapRepository.save(swapRequest);
-
-        const senderProduct = swapRequest.senderProduct['id'];
-        const receiverProduct = swapRequest.receiverProduct['id'];
-
-        return await this.productRepository
-          .createQueryBuilder('product')
-          .update()
-          .set({
-            status: ProductStatusEnum.SWAPPED,
-          })
-          .where(
-            'product.id = :senderProduct or product.id = :receiverProduct',
-            { senderProduct: senderProduct, receiverProduct: receiverProduct },
-          )
-          .execute();
-      } catch (e) {
-        throw BadRequestException;
-      }
+    if (!swapRequest) {
+      throw new BadRequestException('Swap request approved');
     }
+    try {
+      swapRequest.status = SwapStatusesEnum.APPROVED;
+      swapRequest.dropOff = [approvedSwapDto.dropOff];
 
-    return { message: 'Swap Request Not Found' };
+      await this.swapRepository.save(swapRequest);
+
+      const senderProduct = swapRequest.senderProduct['id'];
+      const receiverProduct = swapRequest.receiverProduct['id'];
+
+      await this.productRepository
+        .createQueryBuilder('product')
+        .update()
+        .set({
+          status: ProductStatusEnum.SWAPPED,
+        })
+        .where('product.id = :senderProduct or product.id = :receiverProduct', {
+          senderProduct: senderProduct,
+          receiverProduct: receiverProduct,
+        })
+        .execute();
+      return await this.swapRepository.findOne(approvedSwapDto.id);
+    } catch (e) {
+      throw BadRequestException;
+    }
   }
 
   async getApprovedNotifications(
