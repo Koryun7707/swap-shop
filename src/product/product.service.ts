@@ -72,7 +72,7 @@ export class ProductService {
       .createQueryBuilder('product')
       .where('product.user = :userId', { userId: user.id })
       .leftJoinAndSelect('product.user', 'user')
-      .select(['product', 'user.profilePicture', 'user.id']);
+      .select(['product', 'user.profilePicture', 'user.id', 'user.firstName']);
     const result = await productsModel.getMany();
 
     return result.map((product) => product.toDto());
@@ -107,6 +107,8 @@ export class ProductService {
     search = search.toLowerCase();
     const product = this.productRepository
       .createQueryBuilder('product')
+      .leftJoinAndSelect('product.user', 'user')
+      .select(['product', 'user.profilePicture', 'user.id', 'user.firstName'])
       .where(
         new Brackets((qb) => {
           qb.where(
@@ -131,7 +133,7 @@ export class ProductService {
     const product = await this.productRepository
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.user', 'user')
-      .select(['product', 'user.profilePicture', 'user.id']);
+      .select(['product', 'user.profilePicture', 'user.id', 'user.firstName']);
     if (userModel.blockedBy && userModel.blockedBy.length) {
       product.where('product.user NOT IN (:...blockedBy)', {
         blockedBy: userModel.blockedBy,
