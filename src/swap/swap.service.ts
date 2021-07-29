@@ -9,7 +9,6 @@ import { Not } from 'typeorm';
 import { SwapStatusesEnum } from '../enums/swap-statuses.enum';
 import { ProductStatusEnum } from '../enums/product-status.enum';
 import { ApprovedSwapNotificationsDto } from './dto/ApprovedSwapNotificationsDto';
-import { ProductEntity } from "../product/product.entity";
 
 @Injectable()
 export class SwapService {
@@ -36,16 +35,14 @@ export class SwapService {
     if (!receiverProduct.length) {
       throw new BadRequestException('Invalid receiver product');
     }
-    const swap = await this.swapRepository.findOne({
-      where: {
-        sender: user.id,
-        senderProduct,
-        receiver: createSwapDto.receiver,
-        receiverProduct,
-        status: Not(SwapStatusesEnum.APPROVED),
-      },
-    });
-    if (swap) {
+
+    const existSwapRequest = await this._checkSwapRequestExist(
+      senderProduct,
+      receiverProduct,
+      user,
+      createSwapDto.receiver,
+    );
+    if (existSwapRequest) {
       throw new BadRequestException('You have already requested a swap.');
     }
     const swapModel = await this.swapRepository.create({
@@ -161,5 +158,43 @@ export class SwapService {
         { uuid, receiverId: user.id, status: SwapStatusesEnum.NEW },
       )
       .execute();
+  }
+  private async _checkSwapRequestExist(
+    senderProduct,
+    receiverProduct,
+    user: UserEntity,
+    receiver: string,
+  ): Promise<boolean> {
+    const idsReceiverProduct: Array<string> = [];
+    const idsSenderProduct: Array<string> = [];
+    senderProduct.forEach((item) => {
+      idsSenderProduct.push(item.id);
+    });
+    receiverProduct.forEach((item) => {
+      idsReceiverProduct.push(item.id);
+    });
+    const swap = await this.swapRepository
+      .createQueryBuilder('swap')
+      .where('swap.receiver = :receiver and swap.sender = :sender', {
+        receiver: receiver,
+        sender: user.id,
+      })
+      .select(['swap', '_senderProduct.id', '_receiverProduct.id'])
+      .leftJoin('swap.senderProduct', '_senderProduct')
+      .leftJoin('swap.receiverProduct', '_receiverProduct')
+      .andWhere('_receiverProduct.id IN (:...receiverProduct)', {
+        receiverProduct: idsReceiverProduct,
+      })
+      .andWhere('_senderProduct.id IN (:...senderProduct)', {
+        senderProduct: idsSenderProduct,
+      })
+      .getOne();
+    if (
+      swap.senderProduct.length === idsSenderProduct.length &&
+      swap.receiverProduct.length === idsReceiverProduct.length
+    ) {
+      return true;
+    }
+    return false;
   }
 }

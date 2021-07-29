@@ -24,11 +24,15 @@ export class SwapEntity extends AbstractEntity<SwapDto> {
   @JoinColumn({ name: 'receiver' })
   receiver: string;
 
-  @ManyToMany(() => ProductEntity)
+  @ManyToMany(() => ProductEntity, (product) => product.id, {
+    onDelete: 'CASCADE',
+  })
   @JoinTable()
   senderProduct: ProductEntity[];
 
-  @ManyToMany(() => ProductEntity)
+  @ManyToMany(() => ProductEntity, (product) => product.id, {
+    onDelete: 'CASCADE',
+  })
   @JoinTable()
   receiverProduct: ProductEntity[];
 
