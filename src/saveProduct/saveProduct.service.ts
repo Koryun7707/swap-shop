@@ -21,7 +21,6 @@ export class SaveProductService {
   ): Promise<SaveProductDto> {
     const product = await this.productRepository.findOne({
       where: {
-        user: user.id,
         id: createSaveProductDto.productId,
       },
     });

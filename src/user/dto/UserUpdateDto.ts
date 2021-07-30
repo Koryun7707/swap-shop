@@ -2,11 +2,11 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsOptional } from 'class-validator';
 
 export class UserUpdateDto {
-  @IsNotEmpty({ message: 'First name must not be empty' })
+  @IsOptional()
   @ApiProperty()
   firstName: string;
 
-  @IsNotEmpty({ message: 'Last name must not be empty' })
+  @IsOptional()
   @ApiProperty()
   lastName: string;
 

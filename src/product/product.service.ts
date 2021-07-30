@@ -25,20 +25,19 @@ export class ProductService {
   async uploadProduct(
     user: UserEntity,
     uploadProductDto: UploadProductDto,
-    files: Array<IFile>,
   ): Promise<ProductDto> {
-    let images: string[];
-    if (files.length) {
-      images = await Promise.all(
-        files.map(async (file): Promise<string> => {
-          return await this.awsS3Service.uploadImage(file);
+    let imagesModel: string[];
+    if (uploadProductDto.images && uploadProductDto.images.length) {
+      imagesModel = await Promise.all(
+        uploadProductDto.images.map(async (file): Promise<string> => {
+          return await this.awsS3Service.uploadImage(file, user);
         }),
       );
     }
     const productModel = await this.productRepository.create({
       ...uploadProductDto,
       user: user.id,
-      images,
+      images: imagesModel,
     });
     const product = await this.productRepository.save(productModel);
     return product.toDto();
@@ -47,22 +46,21 @@ export class ProductService {
     user: UserEntity,
     id: string,
     updateProductDto: UpdateProductDto,
-    files: Array<IFile>,
   ): Promise<ProductDto> {
     const product = await this.productRepository.findOne(id);
     if (!product) {
       throw new NotFoundException();
     }
-    let images: string[];
-    if (files && files.length) {
-      images = await Promise.all(
-        files.map(async (file): Promise<string> => {
-          return await this.awsS3Service.uploadImage(file);
+    let imagesModel: string[];
+    if (updateProductDto.images.length) {
+      imagesModel = await Promise.all(
+        updateProductDto.images.map(async (file): Promise<string> => {
+          return await this.awsS3Service.uploadImage(file, user);
         }),
       );
     }
-    if (images && images.length) {
-      updateProductDto.images = images;
+    if (imagesModel && imagesModel.length) {
+      updateProductDto.images = imagesModel;
     }
     await this.productRepository.update(id, updateProductDto);
     const updateProduct = await this.productRepository.findOne(id);
@@ -70,13 +68,14 @@ export class ProductService {
     return updateProduct.toDto();
   }
   async getProducts(user: UserEntity): Promise<ProductDto[]> {
-    const productsModel = await this.productRepository.find({
-      where: {
-        user: user.id,
-      },
-      relations: ['user'],
-    });
-    return productsModel.map((product) => product.toDto());
+    const productsModel = await this.productRepository
+      .createQueryBuilder('product')
+      .where('product.user = :userId', { userId: user.id })
+      .leftJoinAndSelect('product.user', 'user')
+      .select(['product', 'user.profilePicture', 'user.id', 'user.firstName']);
+    const result = await productsModel.getMany();
+
+    return result.map((product) => product.toDto());
   }
   async getAllProducts(user: UserEntity): Promise<ProductDto[]> {
     return this._getNonBlockUsersProducts(user);
@@ -108,6 +107,8 @@ export class ProductService {
     search = search.toLowerCase();
     const product = this.productRepository
       .createQueryBuilder('product')
+      .leftJoinAndSelect('product.user', 'user')
+      .select(['product', 'user.profilePicture', 'user.id', 'user.firstName'])
       .where(
         new Brackets((qb) => {
           qb.where(
@@ -129,7 +130,10 @@ export class ProductService {
     user: UserEntity,
   ): Promise<ProductDto[]> {
     const userModel = await this.userRepository.findOne({ id: user.id });
-    const product = await this.productRepository.createQueryBuilder('product');
+    const product = await this.productRepository
+      .createQueryBuilder('product')
+      .leftJoinAndSelect('product.user', 'user')
+      .select(['product', 'user.profilePicture', 'user.id', 'user.firstName']);
     if (userModel.blockedBy && userModel.blockedBy.length) {
       product.where('product.user NOT IN (:...blockedBy)', {
         blockedBy: userModel.blockedBy,

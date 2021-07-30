@@ -4,9 +4,9 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 
 import { AbstractDto } from '../../common/dto/AbstractDto';
 import { SwapEntity } from '../swap.entity';
+import { ProductEntity } from '../../product/product.entity';
 
 export class SwapDto extends AbstractDto {
-
   @ApiPropertyOptional()
   sender: string;
 
@@ -14,10 +14,10 @@ export class SwapDto extends AbstractDto {
   receiver: string;
 
   @ApiPropertyOptional()
-  senderProduct: string;
+  senderProduct: ProductEntity[];
 
   @ApiPropertyOptional()
-  receiverProduct: string;
+  receiverProduct: ProductEntity[];
 
   @ApiPropertyOptional()
   dropOff: string[];
@@ -26,12 +26,12 @@ export class SwapDto extends AbstractDto {
   status: string;
 
   constructor(swap: SwapEntity) {
-    super(swap)
-    this.sender          = swap.sender;
-    this.receiver        = swap.receiver;
-    this.senderProduct   = swap.senderProduct;
+    super(swap);
+    this.sender = swap.sender;
+    this.receiver = swap.receiver;
+    this.senderProduct = swap.senderProduct;
     this.receiverProduct = swap.receiverProduct;
-    this.dropOff         = swap.dropOff;
-    this.status          = swap.status;
+    this.dropOff = swap.dropOff;
+    this.status = swap.status;
   }
 }

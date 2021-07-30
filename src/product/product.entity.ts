@@ -2,16 +2,16 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn,
+  JoinColumn, JoinTable, ManyToMany,
   ManyToOne,
-  UpdateDateColumn,
-} from 'typeorm';
+  UpdateDateColumn
+} from "typeorm";
 import { AbstractEntity } from '../common/abstract.entity';
 import { ProductDto } from './dto/ProductDto';
 import { UserEntity } from '../user/user.entity';
 import { ProductConditionsEnum } from '../enums/product-conditions.enum';
-import { SwapStatusesEnum } from '../enums/swap-statuses.enum';
 import { ProductStatusEnum } from '../enums/product-status.enum';
+import { SwapEntity } from "../swap/swap.entity";
 
 @Entity({ name: 'product' })
 export class ProductEntity extends AbstractEntity<ProductDto> {
@@ -70,6 +70,12 @@ export class ProductEntity extends AbstractEntity<ProductDto> {
     default: () => 'CURRENT_TIMESTAMP',
   })
   updatedAt: Date;
+
+  @ManyToMany(() => SwapEntity, (swap) => swap.id, {
+    onDelete: 'CASCADE',
+  })
+  @JoinTable()
+  swap: SwapEntity[];
 
   dtoClass = ProductDto;
 }

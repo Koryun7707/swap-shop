@@ -17,7 +17,7 @@ export class SaveProductEntity extends AbstractEntity<SaveProductDto> {
   @JoinColumn({ name: 'user' })
   public user: UserEntity;
 
-  @OneToOne(() => ProductEntity, (product) => product.id, {
+  @ManyToOne(() => ProductEntity, (product) => product.id, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'product' })

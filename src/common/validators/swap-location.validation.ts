@@ -4,22 +4,22 @@ import {
   ValidatorConstraintInterface,
 } from 'class-validator';
 import { Injectable } from '@nestjs/common';
-import { ProductService } from '../../product/product.service';
 import { SwapLocations } from '../../enums/swap-locations';
 
 @ValidatorConstraint({ name: 'ProductExists', async: true })
 @Injectable()
 export class LocationExistsRule implements ValidatorConstraintInterface {
-
-  async validate(value: string) {
+  async validate(value: Array<string>) {
     try {
-      if (SwapLocations.includes(value)) {
-        return true;
-      }
+      value.forEach((item) => {
+        if (!SwapLocations.includes(item)) {
+          return `Location ${item} is not valid`;
+        }
+      });
     } catch (e) {
       return false;
     }
-    return false;
+    return true;
   }
 
   defaultMessage(args: ValidationArguments) {

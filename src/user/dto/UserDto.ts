@@ -33,6 +33,12 @@ export class UserDto extends AbstractDto {
   @ApiPropertyOptional()
   description: string;
 
+  @ApiPropertyOptional()
+  blocked: string[];
+
+  @ApiPropertyOptional()
+  blockedBy: string[];
+
   constructor(user: UserEntity) {
     super(user);
     this.email = user.email;
@@ -43,6 +49,9 @@ export class UserDto extends AbstractDto {
     this.gender = user.gender;
     this.postCode = user.postCode;
     this.profilePicture = user.profilePicture;
+    this.description = user.description;
+    this.blocked = user.blocked;
+    this.blockedBy = user.blockedBy;
     this.description = user.description;
   }
 }
