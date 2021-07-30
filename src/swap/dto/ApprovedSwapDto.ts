@@ -13,4 +13,8 @@ export class ApprovedSwapDto {
   @ApiPropertyOptional()
   @IsNotEmpty()
   dropOff: string;
+
+  @ApiPropertyOptional()
+  @IsNotEmpty()
+  productId: string;
 }

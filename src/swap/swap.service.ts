@@ -11,7 +11,6 @@ import { ProductRepository } from '../product/product.repository';
 import { ApprovedSwapDto } from './dto/ApprovedSwapDto';
 import { Not } from 'typeorm';
 import { SwapStatusesEnum } from '../enums/swap-statuses.enum';
-import { ProductStatusEnum } from '../enums/product-status.enum';
 import { ApprovedSwapNotificationsDto } from './dto/ApprovedSwapNotificationsDto';
 
 @Injectable()
@@ -58,7 +57,7 @@ export class SwapService {
     return await this.swapRepository.save(swapModel);
   }
 
-  async getSwapNotifications(user: UserEntity) {
+  async getNewSwapNotifications(user: UserEntity): Promise<SwapEntity[]> {
     return await this.swapRepository
       .createQueryBuilder('swap')
       .where('swap.receiver = :userId and swap.status = :status', {
@@ -77,10 +76,33 @@ export class SwapService {
       .leftJoin('swap.receiverProduct', `_receiverProduct`)
       .getMany();
   }
+  async getAll(
+    user: UserEntity,
+    approvedSwapNotificationsDto: ApprovedSwapNotificationsDto,
+  ): Promise<SwapEntity[]> {
+    return await this.swapRepository
+      .createQueryBuilder('swap')
+      .where('swap.receiver = :userId or swap.sender = :userId', {
+        userId: user.id,
+      })
+      .select([
+        'swap',
+        '_sender.firstName',
+        '_sender.profilePicture',
+        '_senderProduct',
+        '_receiverProduct',
+      ])
+      .leftJoin('swap.sender', '_sender')
+      .leftJoin('swap.senderProduct', '_senderProduct')
+      .leftJoin('swap.receiverProduct', `_receiverProduct`)
+      .offset(approvedSwapNotificationsDto?.offset || 0)
+      .limit(approvedSwapNotificationsDto?.limit || 10)
+      .getMany();
+  }
 
-  async deleteSwapRequest(user: UserEntity, id: string): Promise<object> {
+  async deleteSwapRequest(user: UserEntity, id: string): Promise<void> {
     try {
-      return await this.swapRepository
+      await this.swapRepository
         .createQueryBuilder('swap')
         .delete()
         .where('(swap.sender = :userId OR swap.receiver = :userId)', {
@@ -104,43 +126,31 @@ export class SwapService {
     if (!swapRequest) {
       throw new BadRequestException('Swap request approved');
     }
-    try {
-      swapRequest.status = SwapStatusesEnum.APPROVED;
-      swapRequest.dropOff = [approvedSwapDto.dropOff];
-
-      await this.swapRepository.save(swapRequest);
-
-      const senderProduct = swapRequest.senderProduct['id'];
-      const receiverProduct = swapRequest.receiverProduct['id'];
-
-      await this.productRepository
-        .createQueryBuilder('product')
-        .update()
-        .set({
-          status: ProductStatusEnum.SWAPPED,
-        })
-        .where('product.id = :senderProduct or product.id = :receiverProduct', {
-          senderProduct: senderProduct,
-          receiverProduct: receiverProduct,
-        })
-        .execute();
-      return await this.swapRepository.findOne(approvedSwapDto.id);
-    } catch (e) {
-      throw BadRequestException;
+    const product = await this.productRepository.findOne({
+      where: {
+        id: approvedSwapDto.productId,
+      },
+    });
+    if (!product) {
+      throw new NotFoundException('product');
     }
+    swapRequest.status = SwapStatusesEnum.APPROVED;
+    swapRequest.dropOff = [approvedSwapDto.dropOff];
+    swapRequest.senderProduct = [product];
+    return await this.swapRepository.save(swapRequest);
   }
 
   async getApprovedNotifications(
     user: UserEntity,
     approvedSwapNotificationsDto: ApprovedSwapNotificationsDto,
-  ): Promise<object> {
+  ): Promise<{ swaps: SwapEntity[]; totalCount: number }> {
     const approvedSwapNotificationsQuery = await this.swapRepository
       .createQueryBuilder('swap')
       .where('(swap.receiver = :receiver and swap.sender = :sender)')
       .orWhere('(swap.sender = :receiver and swap.receiver = :sender)')
       .setParameters({
         receiver: approvedSwapNotificationsDto.receiver,
-        sender: approvedSwapNotificationsDto.sender,
+        sender: user.id,
       })
       .orderBy('swap.updatedAt', 'DESC');
 
@@ -151,14 +161,24 @@ export class SwapService {
       .getMany();
 
     return {
-      statusCode: 200,
-      rows: approvedSwapNotifications.map((item) => item.toDto()),
+      swaps: approvedSwapNotifications.map((item) => item.toDto()),
       totalCount: totalCount,
     };
   }
 
-  async makeSeenNotification(user: UserEntity, uuid: string): Promise<object> {
-    return await this.swapRepository
+  async makeSeenNotification(
+    user: UserEntity,
+    uuid: string,
+  ): Promise<SwapEntity> {
+    const swap = await this.swapRepository.findOne({
+      where: {
+        id: uuid,
+      },
+    });
+    if (!swap) {
+      throw new NotFoundException('swap request');
+    }
+    await this.swapRepository
       .createQueryBuilder('swap')
       .update()
       .set({
@@ -169,6 +189,12 @@ export class SwapService {
         { uuid, receiverId: user.id, status: SwapStatusesEnum.NEW },
       )
       .execute();
+    return await this.swapRepository.findOne({
+      where: {
+        id: uuid,
+      },
+      relations: ['senderProduct', 'receiverProduct'],
+    });
   }
   private async _checkSwapRequestExist(
     senderProduct,
@@ -201,6 +227,7 @@ export class SwapService {
       })
       .getOne();
     if (
+      swap &&
       swap.senderProduct.length === idsSenderProduct.length &&
       swap.receiverProduct.length === idsReceiverProduct.length
     ) {
