@@ -48,9 +48,9 @@ export class ProductDto extends AbstractDto {
     this.color = product.color;
     this.description = product.description;
     this.productCondition = product.productCondition;
-    this.title    = product.title;
+    this.title = product.title;
     this.dropOff = product.dropOff;
-    this.images  = product.images;
-    this.status  = product.status;
+    this.images = product.images;
+    this.status = product.status;
   }
 }

@@ -8,6 +8,7 @@ import { SharedModule } from './shared/shared.module';
 import { ProductModule } from './product/product.module';
 import { MessageModule } from './message/message.module';
 import { SwapModule } from './swap/swap.module';
+import { AppGateway } from './gateway/app.gateway';
 import { SaveProductModule } from './saveProduct/saveProduct.module';
 
 @Module({
@@ -37,6 +38,6 @@ import { SaveProductModule } from './saveProduct/saveProduct.module';
     SaveProductModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [AppGateway],
 })
 export class AppModule {}
