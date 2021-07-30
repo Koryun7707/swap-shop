@@ -6,6 +6,7 @@ import { UserExistsRule } from '../../common/validators/user-exist.validation';
 import { ProductExistsRule } from '../../common/validators/product-exist.validation';
 import { SwapStatusesEnum } from '../../enums/swap-statuses.enum';
 import { LocationExistsRule } from '../../common/validators/swap-location.validation';
+import { ProductEntity } from '../../product/product.entity';
 
 export class CreateSwapDto {
   @ApiPropertyOptional()
@@ -16,12 +17,12 @@ export class CreateSwapDto {
   @ApiPropertyOptional()
   @IsNotEmpty()
   @Validate(ProductExistsRule)
-  senderProduct: string;
+  senderProduct: ProductEntity[];
 
   @ApiPropertyOptional()
   @IsNotEmpty()
   @Validate(ProductExistsRule)
-  receiverProduct: string;
+  receiverProduct: ProductEntity[];
 
   @IsOptional()
   @ApiProperty()
