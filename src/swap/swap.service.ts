@@ -89,8 +89,10 @@ export class SwapService {
         'swap',
         '_sender.firstName',
         '_sender.profilePicture',
+        '_sender.id',
         '_receiver.firstName',
         '_receiver.profilePicture',
+        '_receiver.id',
         '_senderProduct',
         '_receiverProduct',
       ])
