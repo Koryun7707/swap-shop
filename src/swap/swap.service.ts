@@ -89,10 +89,13 @@ export class SwapService {
         'swap',
         '_sender.firstName',
         '_sender.profilePicture',
+        '_receiver.firstName',
+        '_receiver.profilePicture',
         '_senderProduct',
         '_receiverProduct',
       ])
       .leftJoin('swap.sender', '_sender')
+      .leftJoin('swap.receiver', '_receiver')
       .leftJoin('swap.senderProduct', '_senderProduct')
       .leftJoin('swap.receiverProduct', `_receiverProduct`)
       .offset(approvedSwapNotificationsDto?.offset || 0)
