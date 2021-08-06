@@ -76,16 +76,61 @@ export class MessageService {
     }
     const messages = await this.messageRepository
       .createQueryBuilder('message')
-      .where('message.receiver = :receiver', { receiver: receiverId })
-      .andWhere('message.sender = :sender', { sender: user.id })
+      .where('message.sender  = :sender', { sender: user.id })
+      .andWhere('message.users @> ARRAY[:receiverId]::text[]', {
+        receiverId,
+      })
       .offset(offset)
       .limit(limit)
       .orderBy('message.createdAt', 'DESC')
       .getMany();
     return {
       messages: messages.map((item) => item.toDto()),
-      count: await this._getCount(user, receiverId),
+      count: messages.length,
     };
+  }
+  async getAllMessagesByGroup(
+    user: UserEntity,
+    groupId: string,
+  ): Promise<{ count: number; messages: MessageDto[] }> {
+    const messages = await this.messageRepository
+      .createQueryBuilder('message')
+      .where('message.users @> ARRAY[:user]::text[]', {
+        user: user.id,
+      })
+      .andWhere('message.group  = :groupId', { groupId })
+      .orderBy('message.createdAt', 'DESC')
+      .getMany();
+    return {
+      messages: messages.map((item) => item.toDto()),
+      count: messages.length,
+    };
+  }
+  async getAllMessages(
+    user: UserEntity,
+  ): Promise<{ count: number; messages: MessageDto[] }> {
+    const messages = await this.messageRepository
+      .createQueryBuilder('message')
+      .where('message.users @> ARRAY[:user]::text[]', {
+        user: user.id,
+      })
+      .orderBy('message.createdAt', 'DESC')
+      .getMany();
+    return {
+      messages: messages.map((item) => item.toDto()),
+      count: messages.length,
+    };
+  }
+  async getGroup(user: UserEntity): Promise<any> {
+    const messages = await this.messageRepository
+      .createQueryBuilder('message')
+      .where('message.users @> ARRAY[:user]::text[]', {
+        user: user.id,
+      })
+      .leftJoinAndSelect('message.group', 'group')
+      .orderBy('message.createdAt', 'DESC')
+      .getMany();
+    return messages.map((item) => item.toDto());
   }
   async delete(id: string, user: UserEntity): Promise<void> {
     const message = await this.messageRepository.findOne({

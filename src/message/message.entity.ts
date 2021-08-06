@@ -14,7 +14,7 @@ import { GroupEntity } from '../group/group.entity';
 @Entity({ name: 'message' })
 export class MessageEntity extends AbstractEntity<MessageDto> {
   @ManyToOne(() => GroupEntity, (group) => group.id)
-  @JoinColumn({ name: 'receiver' })
+  @JoinColumn({ name: 'group' })
   group: GroupEntity;
 
   @ManyToOne(() => UserEntity, (user) => user.id, { onDelete: 'CASCADE' })

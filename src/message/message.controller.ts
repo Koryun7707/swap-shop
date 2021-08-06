@@ -17,6 +17,7 @@ import { AuthUser } from '../decorators/auth-user.decorator';
 import { UserEntity } from '../user/user.entity';
 import { CreateMessageDto } from './dto/CreateMessageDto';
 import { MessageService } from './message.service';
+import { GroupEntity } from '../group/group.entity';
 
 @Controller('message')
 @ApiTags('message')
@@ -37,7 +38,7 @@ export class MessageController {
     return this.messageService.create(user, createMessageDto);
   }
   @UseGuards(AuthGuard)
-  @Get(':receiverId')
+  @Get('receiver/:receiverId')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     type: [MessageDto],
@@ -49,6 +50,40 @@ export class MessageController {
     @Query() query: { limit: number; offset: number },
   ): Promise<{ count: number; messages: MessageDto[] }> {
     return await this.messageService.getMessages(user, receiverId, query);
+  }
+  @UseGuards(AuthGuard)
+  @Get('group/:id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    type: [MessageDto],
+    description: 'get all messages by group',
+  })
+  async getAllMessagesByGroup(
+    @AuthUser() user: UserEntity,
+    @Param('id') id: string,
+  ): Promise<{ count: number; messages: MessageDto[] }> {
+    return await this.messageService.getAllMessagesByGroup(user, id);
+  }
+  @UseGuards(AuthGuard)
+  @Get('groups-user')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    description: 'get groups-user',
+  })
+  async getGroup(@AuthUser() user: UserEntity): Promise<MessageDto> {
+    return await this.messageService.getGroup(user);
+  }
+  @UseGuards(AuthGuard)
+  @Get('all')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    type: [MessageDto],
+    description: 'get all messages',
+  })
+  async getAllMessages(
+    @AuthUser() user: UserEntity,
+  ): Promise<{ count: number; messages: MessageDto[] }> {
+    return await this.messageService.getAllMessages(user);
   }
 
   @UseGuards(AuthGuard)
