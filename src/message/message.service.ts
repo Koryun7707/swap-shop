@@ -1,8 +1,6 @@
 import {
   Injectable,
-  NotAcceptableException,
   NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { UserEntity } from '../user/user.entity';
 import { CreateMessageDto } from './dto/CreateMessageDto';
@@ -50,11 +48,19 @@ export class MessageService {
 
     const message = await this.messageRepository.save(messageModel);
     const messageDto = message.toDto();
-    const groupUserModel = await this.groupUserRepository.create({
-      group,
-      user,
+    const groupUser = await this.groupUserRepository.findOne({
+      where: {
+        group,
+        user,
+      },
     });
-    await this.groupUserRepository.save(groupUserModel);
+    if (!groupUser) {
+      const groupUserModel = await this.groupUserRepository.create({
+        group,
+        user,
+      });
+      await this.groupUserRepository.save(groupUserModel);
+    }
     // Send socket event to created message
     const room = group.id;
     await this.appGateway.create(null, messageDto, room);
@@ -121,16 +127,19 @@ export class MessageService {
       count: messages.length,
     };
   }
-  async getGroup(user: UserEntity): Promise<any> {
-    const messages = await this.messageRepository
-      .createQueryBuilder('message')
-      .where('message.users @> ARRAY[:user]::text[]', {
+  async getGroup(user: UserEntity): Promise<GroupEntity[]> {
+    return await this.groupRepository
+      .createQueryBuilder('group')
+      .leftJoinAndSelect('group.messages', '_messages')
+      .leftJoinAndSelect('group.groupUsers', '_groupUsers')
+      .leftJoinAndSelect('_groupUsers.lastReceived', '_lastReceived')
+      .leftJoinAndSelect('_groupUsers.lastRead', '_lastRead')
+      .select(['group', '_messages', '_groupUsers'])
+      .where('_messages.users @> ARRAY[:user]::text[]', {
         user: user.id,
       })
-      .leftJoinAndSelect('message.group', 'group')
-      .orderBy('message.createdAt', 'DESC')
+      .orderBy('_messages.createdAt', 'DESC')
       .getMany();
-    return messages.map((item) => item.toDto());
   }
   async delete(id: string, user: UserEntity): Promise<void> {
     const message = await this.messageRepository.findOne({
@@ -141,15 +150,5 @@ export class MessageService {
       throw new NotFoundException();
     }
     await this.messageRepository.delete(id);
-  }
-  private async _getCount(
-    user: UserEntity,
-    receiverId: string,
-  ): Promise<number> {
-    return this.messageRepository
-      .createQueryBuilder('message')
-      .where('message.receiver = :receiver', { receiver: receiverId })
-      .andWhere('message.sender = :sender', { sender: user.id })
-      .getCount();
   }
 }

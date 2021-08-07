@@ -65,12 +65,13 @@ export class MessageController {
     return await this.messageService.getAllMessagesByGroup(user, id);
   }
   @UseGuards(AuthGuard)
-  @Get('groups-user')
+  @Get('groups')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
+    type: [GroupEntity],
     description: 'get groups-user',
   })
-  async getGroup(@AuthUser() user: UserEntity): Promise<MessageDto> {
+  async getGroup(@AuthUser() user: UserEntity): Promise<GroupEntity[]> {
     return await this.messageService.getGroup(user);
   }
   @UseGuards(AuthGuard)

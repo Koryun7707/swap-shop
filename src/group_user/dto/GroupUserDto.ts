@@ -15,13 +15,13 @@ export class GroupUserDto extends AbstractDto {
   user: UserEntity;
 
   @ApiProperty()
-  lastReceivedId: string;
+  lastReceived: UserEntity;
 
   @ApiProperty()
   lastReceivedAt: Date;
 
   @ApiProperty()
-  lastReadId: string;
+  lastRead: UserEntity;
 
   @ApiProperty()
   lastReadAt: Date;
@@ -30,9 +30,9 @@ export class GroupUserDto extends AbstractDto {
     super(groupUserEntity);
     this.group = groupUserEntity.group;
     this.user = groupUserEntity.user;
-    this.lastReceivedId = groupUserEntity.lastReceivedId;
+    this.lastReceived = groupUserEntity.lastReceived;
     this.lastReceivedAt = groupUserEntity.lastReceivedAt;
-    this.lastReadId = groupUserEntity.lastReadId;
+    this.lastRead = groupUserEntity.lastRead;
     this.lastReadAt = groupUserEntity.lastReadAt;
   }
 }

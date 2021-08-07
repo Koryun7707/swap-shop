@@ -22,15 +22,15 @@ export class GroupUserEntity extends AbstractEntity<GroupUserDto> {
   user: UserEntity;
 
   @ManyToOne(() => UserEntity, (user) => user.id, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'lastReceivedId' })
-  lastReceivedId: string;
+  @JoinColumn({ name: 'lastReceived' })
+  lastReceived: UserEntity;
 
   @Column({ nullable: true })
   lastReceivedAt: Date;
 
   @ManyToOne(() => UserEntity, (user) => user.id, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'lastReadId' })
-  lastReadId: string;
+  @JoinColumn({ name: 'lastRead' })
+  lastRead: UserEntity;
 
   @Column({ nullable: true })
   lastReadAt: Date;
