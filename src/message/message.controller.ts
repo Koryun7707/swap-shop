@@ -100,4 +100,16 @@ export class MessageController {
   ): Promise<void> {
     await this.messageService.delete(id, user);
   }
+  @UseGuards(AuthGuard)
+  @Post('group/:id/read')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    description: 'read message',
+  })
+  async readMessage(
+    @AuthUser() user: UserEntity,
+    @Param('id') id: string,
+  ): Promise<void> {
+    await this.messageService.readMessage(id, user);
+  }
 }

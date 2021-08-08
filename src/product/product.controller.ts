@@ -102,4 +102,17 @@ export class ProductController {
   ): Promise<ProductDto> {
     return this.productService.updateProduct(user, id, updateProductDto);
   }
+  @UseGuards(AuthGuard)
+  @Get('filter')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    type: [ProductDto],
+    description: 'search products',
+  })
+  async filterProduct(
+    @AuthUser() user: UserEntity,
+    @Query('filter') filter?: string,
+  ): Promise<ProductDto[]> {
+    return this.productService.filterProduct(user, filter);
+  }
 }

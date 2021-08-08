@@ -126,6 +126,32 @@ export class ProductService {
     const result = await product.getMany();
     return result.map((item) => item.toDto());
   }
+  async filterProduct(
+    user: UserEntity,
+    search?: string,
+  ): Promise<ProductDto[]> {
+    search = search.toLowerCase();
+    const product = this.productRepository
+      .createQueryBuilder('product')
+      .leftJoinAndSelect('product.user', 'user')
+      .select(['product', 'user.profilePicture', 'user.id', 'user.firstName'])
+      .where(
+        new Brackets((qb) => {
+          qb.where(
+            'LOWER(product.name) like :name OR LOWER(product.brandName) like :brandName OR LOWER(product.size) like :size OR LOWER(product.color) like :color',
+            {
+              name: `%${search}%`,
+              brandName: `%${search}%`,
+              size: `%${search}%`,
+              color: `%${search}%`,
+            },
+          );
+        }),
+      )
+      .andWhere('product.user != :userId', { userId: user.id });
+    const result = await product.getMany();
+    return result.map((item) => item.toDto());
+  }
   private async _getNonBlockUsersProducts(
     user: UserEntity,
   ): Promise<ProductDto[]> {

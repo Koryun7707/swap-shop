@@ -1,7 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { UserEntity } from '../user/user.entity';
 import { CreateMessageDto } from './dto/CreateMessageDto';
 import { MessageDto } from './dto/MessageDto';
@@ -12,6 +9,8 @@ import { AppGateway } from '../gateway/app.gateway';
 import { GroupRepository } from '../group/group.repository';
 import { GroupEntity } from '../group/group.entity';
 import { GroupUserRepository } from '../group_user/groupUser.repository';
+import * as http from 'http';
+import * as _ from 'lodash';
 
 @Injectable()
 export class MessageService {
@@ -150,5 +149,39 @@ export class MessageService {
       throw new NotFoundException();
     }
     await this.messageRepository.delete(id);
+  }
+  async readMessage(id: string, user: UserEntity): Promise<void> {
+    const group = await this.groupRepository.findOne({
+      id,
+    });
+    if (!group) {
+      throw new NotFoundException('group');
+    }
+    const groupUser = await this.groupUserRepository.findOne({
+      group,
+      user,
+    });
+    if (!groupUser) {
+      throw new NotFoundException('groupUser');
+    }
+    const latestMessage = await this.findLatestMessageOfGroup(group);
+    if (latestMessage) {
+      await this.groupUserRepository.update(
+        {
+          id: groupUser.id,
+        },
+        {
+          lastRead: user,
+          lastReadAt: new Date(Date.now()),
+        },
+      );
+    }
+  }
+  async findLatestMessageOfGroup(group) {
+    return this.messageRepository
+      .createQueryBuilder('message')
+      .where({ group })
+      .orderBy('message.createdAt', 'DESC')
+      .getOne();
   }
 }
