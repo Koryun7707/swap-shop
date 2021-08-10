@@ -27,25 +27,23 @@ export class AwsS3Service {
   }
 
   async uploadImage(file: string, user: UserEntity): Promise<string> {
-    // const fileName = this.generatorService.fileName(
-    //   <string>mime.extension(file.mimetype),
-    // );
-    // const key = `images/${fileName}`;
+    const fileName = this.generatorService.fileName('jpeg');
+    const key = `images/${fileName}`;
     const buf = Buffer.from(
       file.replace(/^data:image\/\w+;base64,/, ''),
       'base64',
     );
     await this._s3
-      .putObject({
+      .upload({
         ContentEncoding: 'base64',
         Bucket: process.env.S3_BUCKET_NAME,
         Body: buf,
         ACL: 'public-read',
-        Key: user.id,
+        Key: key,
         ContentType: 'image/jpeg',
       })
       .promise();
-    return `${process.env.S3_BASELINK}${user.id}`;
+    return `${process.env.S3_BASELINK}${key}`;
   }
 
   // async uploadFile(file: IFile): Promise<string> {
