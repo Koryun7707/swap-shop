@@ -51,13 +51,27 @@ export class SaveProductController {
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
-    type: [SaveProductDto],
-    description: 'get save products',
+    description: 'delete save product',
   })
   async deleteSaveProduct(
     @AuthUser() user: UserEntity,
     @Param('id') id: string,
   ): Promise<void> {
     return this.saveProductService.deleteSaveProduct(user, id);
+  }
+  @UseGuards(AuthGuard)
+  @Delete('deleteByProductId/:productId')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    description: 'delete save product by productId',
+  })
+  async deleteSaveProductByProductId(
+    @AuthUser() user: UserEntity,
+    @Param('productId') productId: string,
+  ): Promise<void> {
+    return this.saveProductService.deleteSaveProductByProductId(
+      user,
+      productId,
+    );
   }
 }

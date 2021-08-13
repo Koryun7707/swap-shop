@@ -64,4 +64,19 @@ export class SaveProductService {
     }
     await this.saveProductRepository.delete(id);
   }
+  async deleteSaveProductByProductId(
+    user: UserEntity,
+    productId: string,
+  ): Promise<void> {
+    const saveProduct = await this.saveProductRepository.findOne({
+      where: {
+        product: productId,
+        user,
+      },
+    });
+    if (!saveProduct) {
+      throw new NotFoundException();
+    }
+    await this.saveProductRepository.delete({ id: saveProduct.id });
+  }
 }
