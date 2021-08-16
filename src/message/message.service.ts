@@ -29,6 +29,18 @@ export class MessageService {
     if (!receiver) {
       throw new NotFoundException('User not found');
     }
+    const messages = await this.messageRepository
+      .createQueryBuilder('message')
+      .where('message.users @> ARRAY[:user]::text[]', {
+        user: user.id,
+      })
+      .andWhere('message.users @> ARRAY[:receiverId]::text[]', {
+        receiverId: createMessageDto.receiverId,
+      })
+      .leftJoinAndSelect('message.group', '_group')
+      .select('_group.id')
+      .getOne();
+    console.log(messages, 444);
     let group: GroupEntity;
     if (!createMessageDto.groupId) {
       const groupModel = await this.groupRepository.create({});
@@ -105,7 +117,8 @@ export class MessageService {
       .where('message.users @> ARRAY[:user]::text[]', {
         user: user.id,
       })
-      .select(['message.message', 'message.id'])
+      .leftJoinAndSelect('message.sender', '_sender')
+      .select(['message.message', 'message.id', '_sender.id'])
       .andWhere('message.group  = :groupId', { groupId })
       .orderBy('message.createdAt', 'DESC')
       .getMany();
