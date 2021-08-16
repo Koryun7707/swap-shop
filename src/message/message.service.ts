@@ -38,15 +38,13 @@ export class MessageService {
         receiverId: createMessageDto.receiverId,
       })
       .leftJoinAndSelect('message.group', '_group')
-      .select('_group.id')
       .getOne();
-    console.log(messages, 444);
     let group: GroupEntity;
-    if (!createMessageDto.groupId) {
+    if (messages && messages.group) {
+      group = await this.groupRepository.findOne(messages.group.id);
+    } else {
       const groupModel = await this.groupRepository.create({});
       group = await this.groupRepository.save(groupModel);
-    } else {
-      group = await this.groupRepository.findOne(createMessageDto.groupId);
     }
 
     const messageModel = new MessageEntity();
