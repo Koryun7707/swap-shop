@@ -61,7 +61,7 @@ export class MessageController {
   async getAllMessagesByGroup(
     @AuthUser() user: UserEntity,
     @Param('id') id: string,
-  ): Promise<{ count: number; messages: MessageDto[] }> {
+  ): Promise<{  messages: MessageDto[],receiver:UserEntity }> {
     return await this.messageService.getAllMessagesByGroup(user, id);
   }
   @UseGuards(AuthGuard)

@@ -1,7 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { UserEntity } from '../user/user.entity';
 import { CreateMessageDto } from './dto/CreateMessageDto';
 import { MessageDto } from './dto/MessageDto';
@@ -98,18 +95,41 @@ export class MessageService {
   async getAllMessagesByGroup(
     user: UserEntity,
     groupId: string,
-  ): Promise<{ count: number; messages: MessageDto[] }> {
+  ): Promise<{ messages: MessageDto[]; receiver: UserEntity }> {
+    const group = await this.groupRepository.findOne(groupId);
+    if (!group) {
+      throw new NotFoundException('group');
+    }
     const messages = await this.messageRepository
+      .createQueryBuilder('message')
+      .where('message.users @> ARRAY[:user]::text[]', {
+        user: user.id,
+      })
+      .select(['message.message', 'message.id'])
+      .andWhere('message.group  = :groupId', { groupId })
+      .orderBy('message.createdAt', 'DESC')
+      .getMany();
+    const messageReceiver = await this.messageRepository
       .createQueryBuilder('message')
       .where('message.users @> ARRAY[:user]::text[]', {
         user: user.id,
       })
       .andWhere('message.group  = :groupId', { groupId })
       .orderBy('message.createdAt', 'DESC')
-      .getMany();
+      .getOne();
+    const receiverId = messageReceiver.users.splice(
+      messageReceiver.users.indexOf(user.id, 1),
+    );
+    const receiver = await this.userRepository.findOne({
+      where: {
+        id: receiverId[0],
+      },
+      select: ['profilePicture', 'id'],
+    });
+
     return {
+      receiver,
       messages: messages.map((item) => item.toDto()),
-      count: messages.length,
     };
   }
   async getAllMessages(
