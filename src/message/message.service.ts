@@ -97,6 +97,15 @@ export class MessageService {
       .limit(limit)
       .orderBy('message.createdAt', 'DESC')
       .getMany();
+    const group = await this.messageRepository
+      .createQueryBuilder('message')
+      .leftJoinAndSelect('message.group', '_group')
+      .where('message.sender  = :sender', { sender: user.id })
+      .andWhere('message.users @> ARRAY[:receiverId]::text[]', {
+        receiverId,
+      })
+      .getOne();
+    console.log(group,11);
     return {
       messages: messages.map((item) => item.toDto()),
       count: messages.length,

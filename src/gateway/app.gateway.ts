@@ -73,6 +73,24 @@ export class AppGateway
   }
 
   handleConnection(client: Socket): void {
+        // const user = await this._socketGuard.connectAuth(client);
+    // if (user) {
+    //   const isOnline = true;
+    //   const updatedUser = await this._boardUserOnlineService.createOrUpdate(
+    //     user,
+    //     boardId,
+    //     isOnline,
+    //   );
+    //   this.boardcastToBoardId(client, BoardEventEnum.MEMBER_STATUS, {
+    //     boardId,
+    //     data: updatedUser,
+    //   });
+    // }
+
+    if (client.handshake.query?.groupId) {
+      client.join(client.handshake.query.groupId);
+      client.emit(MessageEventEnum.JOIN_ROOM, client.handshake.query.groupId);
+    }
     return this.logger.log(`Client connected ${client.id}`);
   }
 
