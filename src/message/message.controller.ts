@@ -6,8 +6,8 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseUUIDPipe,
   Post,
-  Query,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
@@ -44,12 +44,11 @@ export class MessageController {
     type: [MessageDto],
     description: 'get messages',
   })
-  async getMessages(
+  async getGroupByReceiverId(
     @AuthUser() user: UserEntity,
-    @Param('receiverId') receiverId: string,
-    @Query() query: { limit: number; offset: number },
-  ): Promise<{ count: number; messages: MessageDto[] }> {
-    return await this.messageService.getMessages(user, receiverId, query);
+    @Param('receiverId', new ParseUUIDPipe()) receiverId: string,
+  ): Promise<GroupEntity> {
+    return await this.messageService.getGroupByReceiverId(user, receiverId);
   }
   @UseGuards(AuthGuard)
   @Get('group/:id')
@@ -61,7 +60,7 @@ export class MessageController {
   async getAllMessagesByGroup(
     @AuthUser() user: UserEntity,
     @Param('id') id: string,
-  ): Promise<{  messages: MessageDto[],receiver:UserEntity }> {
+  ): Promise<{ messages: MessageDto[]; receiver: UserEntity }> {
     return await this.messageService.getAllMessagesByGroup(user, id);
   }
   @UseGuards(AuthGuard)

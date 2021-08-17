@@ -74,30 +74,17 @@ export class MessageService {
 
     return messageDto;
   }
-  async getMessages(
+  async getGroupByReceiverId(
     user: UserEntity,
     receiverId: string,
-    query: { limit: number; offset: number },
-  ): Promise<{ count: number; messages: MessageDto[] }> {
-    const offset = query.offset ? query.offset : 0;
-    const limit = query.limit ? query.limit : 10;
+  ): Promise<GroupEntity> {
     const receiver = await this.userRepository.findOne({
       id: receiverId,
     });
     if (!receiver) {
       throw new NotFoundException('User not found');
     }
-    const messages = await this.messageRepository
-      .createQueryBuilder('message')
-      .where('message.sender  = :sender', { sender: user.id })
-      .andWhere('message.users @> ARRAY[:receiverId]::text[]', {
-        receiverId,
-      })
-      .offset(offset)
-      .limit(limit)
-      .orderBy('message.createdAt', 'DESC')
-      .getMany();
-    const group = await this.messageRepository
+    const messageGroup = await this.messageRepository
       .createQueryBuilder('message')
       .leftJoinAndSelect('message.group', '_group')
       .where('message.sender  = :sender', { sender: user.id })
@@ -105,11 +92,30 @@ export class MessageService {
         receiverId,
       })
       .getOne();
-    console.log(group,11);
-    return {
-      messages: messages.map((item) => item.toDto()),
-      count: messages.length,
-    };
+    let group: GroupEntity;
+    if (messageGroup) {
+      group = await this.groupRepository.findOne({
+        where: {
+          id: messageGroup.group.id,
+        },
+      });
+    } else {
+      const groupModel = await this.groupRepository.create({});
+      group = await this.groupRepository.save(groupModel);
+      const messageModel = new MessageEntity();
+      messageModel.sender = user;
+      messageModel.message = '';
+      messageModel.users = [receiver.id, user.id];
+      messageModel.group = group;
+      const groupUserModel = await this.groupUserRepository.create({
+        group,
+        user,
+      });
+      await this.groupUserRepository.save(groupUserModel);
+
+      await this.messageRepository.save(messageModel);
+    }
+    return group;
   }
   async getAllMessagesByGroup(
     user: UserEntity,
