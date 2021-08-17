@@ -133,7 +133,7 @@ export class MessageService {
       .leftJoinAndSelect('message.sender', '_sender')
       .select(['message.message', 'message.id', '_sender.id'])
       .andWhere('message.group  = :groupId', { groupId })
-      .orderBy('message.createdAt', 'DESC')
+      .orderBy('message.createdAt', 'ASC')
       .getMany();
     const messageReceiver = await this.messageRepository
       .createQueryBuilder('message')
@@ -141,7 +141,7 @@ export class MessageService {
         user: user.id,
       })
       .andWhere('message.group  = :groupId', { groupId })
-      .orderBy('message.createdAt', 'DESC')
+      .orderBy('message.createdAt', 'ASC')
       .getOne();
     const receiverId = messageReceiver.users.splice(
       messageReceiver.users.indexOf(user.id, 1),
@@ -166,7 +166,7 @@ export class MessageService {
       .where('message.users @> ARRAY[:user]::text[]', {
         user: user.id,
       })
-      .orderBy('message.createdAt', 'DESC')
+      .orderBy('message.createdAt', 'ASC')
       .getMany();
     return {
       messages: messages.map((item) => item.toDto()),
@@ -184,7 +184,7 @@ export class MessageService {
       .where('_messages.users @> ARRAY[:user]::text[]', {
         user: user.id,
       })
-      .orderBy('_messages.createdAt', 'DESC')
+      .orderBy('_messages.createdAt', 'ASC')
       .getMany();
   }
   async delete(id: string, user: UserEntity): Promise<void> {
