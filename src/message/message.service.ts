@@ -115,7 +115,7 @@ export class MessageService {
 
       await this.messageRepository.save(messageModel);
     }
-    return group;
+    return await this._getOneGroup(group.id);
   }
   async getAllMessagesByGroup(
     user: UserEntity,
@@ -172,6 +172,18 @@ export class MessageService {
       messages: messages.map((item) => item.toDto()),
       count: messages.length,
     };
+  }
+  private async _getOneGroup(groupId): Promise<GroupEntity> {
+    return await this.groupRepository
+      .createQueryBuilder('group')
+      .leftJoinAndSelect('group.messages', '_messages')
+      .leftJoinAndSelect('group.groupUsers', '_groupUsers')
+      .leftJoinAndSelect('_groupUsers.lastReceived', '_lastReceived')
+      .leftJoinAndSelect('_groupUsers.lastRead', '_lastRead')
+      .leftJoinAndSelect('_groupUsers.user', '_user')
+      .where('group.id  = :groupId', { groupId })
+      .orderBy('_messages.createdAt', 'ASC')
+      .getOne();
   }
   async getGroup(user: UserEntity): Promise<GroupEntity[]> {
     return await this.groupRepository
