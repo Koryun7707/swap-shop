@@ -180,7 +180,7 @@ export class MessageService {
       .leftJoinAndSelect('group.groupUsers', '_groupUsers')
       .leftJoinAndSelect('_groupUsers.lastReceived', '_lastReceived')
       .leftJoinAndSelect('_groupUsers.lastRead', '_lastRead')
-      .select(['group', '_messages', '_groupUsers'])
+      .leftJoinAndSelect('_groupUsers.user', '_user')
       .where('_messages.users @> ARRAY[:user]::text[]', {
         user: user.id,
       })
