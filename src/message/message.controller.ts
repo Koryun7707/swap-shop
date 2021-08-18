@@ -8,6 +8,7 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
@@ -38,17 +39,17 @@ export class MessageController {
     return this.messageService.create(user, createMessageDto);
   }
   @UseGuards(AuthGuard)
-  @Get('receiver/:receiverId')
+  @Post('group')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
-    type: [MessageDto],
-    description: 'get messages',
+    type: GroupEntity,
+    description: 'create group',
   })
   async getGroupByReceiverId(
+    @Query('receiverId', new ParseUUIDPipe()) receiverId: string,
     @AuthUser() user: UserEntity,
-    @Param('receiverId', new ParseUUIDPipe()) receiverId: string,
   ): Promise<GroupEntity> {
-    return await this.messageService.getGroupByReceiverId(user, receiverId);
+    return await this.messageService.createGroupByReceiverId(user, receiverId);
   }
   @UseGuards(AuthGuard)
   @Get('group/:id')

@@ -74,11 +74,11 @@ export class MessageService {
 
     return messageDto;
   }
-  async getGroupByReceiverId(
+  async createGroupByReceiverId(
     user: UserEntity,
     receiverId: string,
   ): Promise<GroupEntity> {
-    const receiver = await this.userRepository.findOne({
+    const receiver: UserEntity = await this.userRepository.findOne({
       id: receiverId,
     });
     if (!receiver) {
@@ -107,11 +107,16 @@ export class MessageService {
       messageModel.message = '';
       messageModel.users = [receiver.id, user.id];
       messageModel.group = group;
-      const groupUserModel = await this.groupUserRepository.create({
+      const groupUserModelSender = await this.groupUserRepository.create({
         group,
         user,
       });
-      await this.groupUserRepository.save(groupUserModel);
+      await this.groupUserRepository.save(groupUserModelSender);
+      const groupUserModelReceiver = await this.groupUserRepository.create({
+        group,
+        user: receiver,
+      });
+      await this.groupUserRepository.save(groupUserModelReceiver);
 
       await this.messageRepository.save(messageModel);
     }
