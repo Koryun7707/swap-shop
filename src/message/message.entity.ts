@@ -24,7 +24,7 @@ export class MessageEntity extends AbstractEntity<MessageDto> {
   @Column('text', { nullable: true, array: true })
   users: string[];
 
-  @Column({ nullable: false })
+  @Column({ nullable: true })
   message: string;
 
   @CreateDateColumn({

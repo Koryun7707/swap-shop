@@ -55,16 +55,29 @@ export class MessageService {
 
     const message = await this.messageRepository.save(messageModel);
     const messageDto = message.toDto();
-    const groupUser = await this.groupUserRepository.findOne({
+    const groupUserSender = await this.groupUserRepository.findOne({
       where: {
         group,
         user,
       },
     });
-    if (!groupUser) {
+    const groupUserReceiver = await this.groupUserRepository.findOne({
+      where: {
+        group,
+        user,
+      },
+    });
+    if (!groupUserSender) {
       const groupUserModel = await this.groupUserRepository.create({
         group,
         user,
+      });
+      await this.groupUserRepository.save(groupUserModel);
+    }
+    if (!groupUserReceiver) {
+      const groupUserModel = await this.groupUserRepository.create({
+        group,
+        user: receiver,
       });
       await this.groupUserRepository.save(groupUserModel);
     }
@@ -104,7 +117,6 @@ export class MessageService {
       group = await this.groupRepository.save(groupModel);
       const messageModel = new MessageEntity();
       messageModel.sender = user;
-      messageModel.message = '';
       messageModel.users = [receiver.id, user.id];
       messageModel.group = group;
       const groupUserModelSender = await this.groupUserRepository.create({
