@@ -12,6 +12,7 @@ import { ApprovedSwapDto } from './dto/ApprovedSwapDto';
 import { Not } from 'typeorm';
 import { SwapStatusesEnum } from '../enums/swap-statuses.enum';
 import { ApprovedSwapNotificationsDto } from './dto/ApprovedSwapNotificationsDto';
+import { ProductStatusEnum } from '../enums/product-status.enum';
 
 @Injectable()
 export class SwapService {
@@ -139,9 +140,16 @@ export class SwapService {
     if (!product) {
       throw new NotFoundException('product');
     }
+    if (product.status === ProductStatusEnum.SWAPPED) {
+      throw new BadRequestException('product swapped');
+    }
     swapRequest.status = SwapStatusesEnum.APPROVED;
     swapRequest.dropOff = [approvedSwapDto.dropOff];
     swapRequest.senderProduct = [product];
+    await this.productRepository.update(
+      { id: product.id },
+      { status: ProductStatusEnum.SWAPPED },
+    );
     return await this.swapRepository.save(swapRequest);
   }
 

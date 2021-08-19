@@ -1,4 +1,4 @@
 export enum ProductStatusEnum {
-    NOT_SWAPPED        = "not swapped",
-    SWAPPED        = "swapped",
+  NOT_SWAPPED = 'not swapped',
+  SWAPPED = 'swapped',
 }

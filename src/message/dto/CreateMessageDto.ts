@@ -15,5 +15,10 @@ export class CreateMessageDto {
   @IsString()
   @IsOptional()
   @ApiProperty()
+  messageImage: string;
+
+  @IsString()
+  @IsOptional()
+  @ApiProperty()
   groupId: string;
 }

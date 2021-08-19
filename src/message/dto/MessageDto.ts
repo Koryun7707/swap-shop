@@ -20,11 +20,15 @@ export class MessageDto extends AbstractDto {
   @ApiProperty()
   message: string;
 
+  @ApiProperty()
+  messageImage: string;
+
   constructor(messageEntity: MessageEntity) {
     super(messageEntity);
     this.group = messageEntity.group;
     this.sender = messageEntity.sender;
     this.users = messageEntity.users;
     this.message = messageEntity.message;
+    this.messageImage = messageEntity.messageImage;
   }
 }

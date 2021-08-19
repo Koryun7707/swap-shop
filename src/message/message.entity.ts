@@ -27,6 +27,9 @@ export class MessageEntity extends AbstractEntity<MessageDto> {
   @Column({ nullable: true })
   message: string;
 
+  @Column({ nullable: true })
+  messageImage: string;
+
   @CreateDateColumn({
     type: 'timestamp',
     name: 'createdAt',
