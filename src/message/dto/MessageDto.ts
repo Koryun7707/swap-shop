@@ -21,7 +21,10 @@ export class MessageDto extends AbstractDto {
   message: string;
 
   @ApiProperty()
-  messageImage: string;
+  dropOff: string;
+
+  @ApiProperty()
+  messageImage: string[];
 
   constructor(messageEntity: MessageEntity) {
     super(messageEntity);
@@ -30,5 +33,6 @@ export class MessageDto extends AbstractDto {
     this.users = messageEntity.users;
     this.message = messageEntity.message;
     this.messageImage = messageEntity.messageImage;
+    this.dropOff = messageEntity.dropOff;
   }
 }

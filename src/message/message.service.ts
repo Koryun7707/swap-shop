@@ -50,6 +50,12 @@ export class MessageService {
     const messageModel = new MessageEntity();
     messageModel.sender = user;
     messageModel.message = createMessageDto.message;
+    createMessageDto.messageImage
+      ? (messageModel.messageImage = createMessageDto.messageImage)
+      : null;
+    createMessageDto.dropOff
+      ? (messageModel.dropOff = createMessageDto.dropOff)
+      : null;
     messageModel.users = [receiver.id, user.id];
     messageModel.group = group;
 
