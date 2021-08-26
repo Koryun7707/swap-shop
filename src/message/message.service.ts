@@ -154,7 +154,13 @@ export class MessageService {
         user: user.id,
       })
       .leftJoinAndSelect('message.sender', '_sender')
-      .select(['message.message', 'message.id', '_sender.id'])
+      .select([
+        'message.message',
+        'message.id',
+        '_sender.id',
+        'message.messageImage',
+        'message.dropOff',
+      ])
       .andWhere('message.group  = :groupId', { groupId })
       .orderBy('message.createdAt', 'ASC')
       .getMany();
