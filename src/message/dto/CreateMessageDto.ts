@@ -12,7 +12,6 @@ export class CreateMessageDto {
   @ApiProperty()
   message: string;
 
-  @IsString()
   @IsOptional()
   @ApiProperty()
   messageImage: string[];
