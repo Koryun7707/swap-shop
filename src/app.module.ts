@@ -10,11 +10,12 @@ import { MessageModule } from './message/message.module';
 import { SwapModule } from './swap/swap.module';
 import { AppGateway } from './gateway/app.gateway';
 import { SaveProductModule } from './saveProduct/saveProduct.module';
+import { join } from 'path';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: `.${process.env.NODE_ENV}.env`,
+      envFilePath: join(__dirname, `../.${process.env.NODE_ENV}.env`),
       isGlobal: true, // no need to import into other modules
     }),
     TypeOrmModule.forRoot({
