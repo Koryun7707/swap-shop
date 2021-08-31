@@ -112,19 +112,19 @@ export class ProductService {
       .where(
         new Brackets((qb) => {
           qb.where(
-            'LOWER(product.name) like :name OR LOWER(product.brandName) like :brandName OR LOWER(product.size) like :size OR LOWER(product.color) like :color',
+            'LOWER(product.name) like :name OR LOWER(product.brandName) like :brandName OR LOWER(product.size) like :size OR LOWER(product.color) like :color OR LOWER(product.title) like :title',
             {
               name: `%${search}%`,
               brandName: `%${search}%`,
               size: `%${search}%`,
               color: `%${search}%`,
+              title: `%${search}%`,
             },
           );
         }),
       )
       .andWhere('product.user != :userId', { userId: user.id });
     const result = await product.getMany();
-    console.log(result,111);
     return result.map((item) => item.toDto());
   }
   private async _getNonBlockUsersProducts(
