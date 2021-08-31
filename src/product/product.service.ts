@@ -124,6 +124,7 @@ export class ProductService {
       )
       .andWhere('product.user != :userId', { userId: user.id });
     const result = await product.getMany();
+    console.log(result,111);
     return result.map((item) => item.toDto());
   }
   private async _getNonBlockUsersProducts(
