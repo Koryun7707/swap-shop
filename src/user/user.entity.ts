@@ -31,6 +31,9 @@ export class UserEntity extends AbstractEntity<UserDto> {
   @Column({ nullable: true })
   profilePicture: string;
 
+  @Column({ nullable: true })
+  age: Date;
+
   @Column('text', { nullable: true, array: true })
   blocked: string[];
 

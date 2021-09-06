@@ -29,4 +29,8 @@ export class UserUpdateDto {
   @IsOptional()
   @ApiProperty()
   description: string;
+
+  @IsOptional()
+  @ApiProperty()
+  age: string;
 }
