@@ -34,7 +34,7 @@ export class UserDto extends AbstractDto {
   description: string;
 
   @ApiPropertyOptional()
-  age: Date;
+  age: string;
 
   @ApiPropertyOptional()
   blocked: string[];

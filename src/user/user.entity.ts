@@ -32,7 +32,7 @@ export class UserEntity extends AbstractEntity<UserDto> {
   profilePicture: string;
 
   @Column({ nullable: true })
-  age: Date;
+  age: string;
 
   @Column('text', { nullable: true, array: true })
   blocked: string[];
