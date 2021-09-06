@@ -32,7 +32,7 @@ export class AuthService {
   async loginUser(userLoginDto: UserLoginDto): Promise<LoginPayloadDto> {
     const userEntity = await this.validateUser(userLoginDto);
     if (!userEntity.verified) {
-      throw new UnauthorizedException();
+      throw new BadRequestException('User not verified');
     }
 
     // const userEntity = await this.validateUser(userLoginDto);
