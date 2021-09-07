@@ -143,7 +143,11 @@ export class MessageService {
   async getAllMessagesByGroup(
     user: UserEntity,
     groupId: string,
-  ): Promise<{ messages: MessageDto[]; receiver: UserEntity }> {
+  ): Promise<{
+    messages: MessageDto[];
+    receiver: UserEntity;
+    senderId: string;
+  }> {
     const group = await this.groupRepository.findOne(groupId);
     if (!group) {
       throw new NotFoundException('group');
@@ -183,8 +187,9 @@ export class MessageService {
     });
 
     return {
-      receiver,
       messages: messages.map((item) => item.toDto()),
+      receiver,
+      senderId: user.id,
     };
   }
   async getAllMessages(
