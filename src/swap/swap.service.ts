@@ -146,10 +146,8 @@ export class SwapService {
     swapRequest.status = SwapStatusesEnum.APPROVED;
     swapRequest.dropOff = [approvedSwapDto.dropOff];
     swapRequest.senderProduct = [product];
-    await this.productRepository.update(
-      { id: product.id },
-      { status: ProductStatusEnum.SWAPPED },
-    );
+    product.status = ProductStatusEnum.SWAPPED;
+    await this.productRepository.save(product);
     return await this.swapRepository.save(swapRequest);
   }
 
