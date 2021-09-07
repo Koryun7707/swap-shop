@@ -148,6 +148,14 @@ export class SwapService {
     swapRequest.senderProduct = [product];
     product.status = ProductStatusEnum.SWAPPED;
     await this.productRepository.save(product);
+    await this.productRepository.update(
+      {
+        id: swapRequest.receiverProduct[0].id,
+      },
+      {
+        status: ProductStatusEnum.SWAPPED,
+      },
+    );
     return await this.swapRepository.save(swapRequest);
   }
 
