@@ -7,10 +7,10 @@ import { Column } from 'typeorm';
 export class UserRegisterDto {
   @IsString()
   @IsEmail()
-  @IsNotEmpty({ message:'email is required' })
+  @IsNotEmpty({ message: 'email is required' })
   @ApiProperty()
   @Column()
-  readonly email: string;
+  email: string;
 
   @IsString()
   @MinLength(6)

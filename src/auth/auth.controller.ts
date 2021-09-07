@@ -34,6 +34,7 @@ export class AuthController {
   async userRegister(
     @Body() userRegisterDto: UserRegisterDto,
   ): Promise<UserDto> {
+    userRegisterDto.email = userRegisterDto.email.toLocaleLowerCase();
     const isExists = await this.userService.checkIfExists(
       userRegisterDto.email,
     );
@@ -54,6 +55,7 @@ export class AuthController {
   @Post('verifyOTP')
   @HttpCode(HttpStatus.OK)
   async verifyOTP(@Body() userVerifyDto: UserVerifyDto): Promise<UserDto> {
+    userVerifyDto.email = userVerifyDto.email.toLocaleLowerCase();
     const user = await this.userRepository.findOne({
       email: userVerifyDto.email,
     });
@@ -78,6 +80,7 @@ export class AuthController {
   @Post('verifyCode')
   @HttpCode(HttpStatus.OK)
   async verifyCode(@Body() userVerifyDto: UserVerifyDto): Promise<boolean> {
+    userVerifyDto.email = userVerifyDto.email.toLocaleLowerCase();
     const user = await this.userRepository.findOne({
       email: userVerifyDto.email,
     });
