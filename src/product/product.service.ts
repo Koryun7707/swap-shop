@@ -72,7 +72,9 @@ export class ProductService {
       .createQueryBuilder('product')
       .where('product.user = :userId', { userId: user.id })
       .leftJoinAndSelect('product.user', 'user')
-      .select(['product', 'user.profilePicture', 'user.id', 'user.firstName']);
+      .select(['product', 'user.profilePicture', 'user.id', 'user.firstName'])
+      .orderBy('product.createdAt', 'DESC');
+
     const result = await productsModel.getMany();
 
     return result.map((product) => product.toDto());
@@ -151,7 +153,7 @@ export class ProductService {
         blocked: userModel.blocked,
       });
     }
-    product.orderBy('product.createdAt', 'ASC');
+    product.orderBy('product.createdAt', 'DESC');
 
     const result = await product.getMany();
 
