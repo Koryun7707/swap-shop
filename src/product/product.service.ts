@@ -151,6 +151,8 @@ export class ProductService {
         blocked: userModel.blocked,
       });
     }
+    product.orderBy('product.createdAt', 'ASC');
+
     const result = await product.getMany();
 
     return result.map((item) => item.toDto());
