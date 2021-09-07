@@ -134,7 +134,13 @@ export class ProductService {
     const product = await this.productRepository
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.user', 'user')
-      .select(['product', 'user.profilePicture', 'user.id', 'user.firstName']);
+      .select([
+        'product',
+        'user.profilePicture',
+        'user.id',
+        'user.firstName',
+        'user.description',
+      ]);
     if (userModel.blockedBy && userModel.blockedBy.length) {
       product.where('product.user NOT IN (:...blockedBy)', {
         blockedBy: userModel.blockedBy,
