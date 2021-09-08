@@ -176,9 +176,11 @@ export class MessageService {
       .andWhere('message.group  = :groupId', { groupId })
       .orderBy('message.createdAt', 'ASC')
       .getOne();
+    console.log(messageReceiver);
     const receiverId = messageReceiver.users.splice(
       messageReceiver.users.indexOf(user.id, 1),
     );
+
     const receiver = await this.userRepository.findOne({
       where: {
         id: receiverId[0],
