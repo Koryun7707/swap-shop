@@ -9,6 +9,8 @@ import { Brackets } from 'typeorm';
 import { UserRepository } from '../user/user.repository';
 import { ProductEntity } from './product.entity';
 import { UpdateProductDto } from './dto/UpdateProductDto';
+import { UserDto } from '../user/dto/UserDto';
+import { SearchDto } from "./dto/SearchDto";
 
 @Injectable()
 export class ProductService {
@@ -105,7 +107,7 @@ export class ProductService {
   async searchProduct(
     user: UserEntity,
     search?: string,
-  ): Promise<ProductDto[]> {
+  ): Promise<SearchDto> {
     search = search.toLowerCase();
     const product = this.productRepository
       .createQueryBuilder('product')
@@ -126,8 +128,22 @@ export class ProductService {
         }),
       )
       .andWhere('product.user != :userId', { userId: user.id });
-    const result = await product.getMany();
-    return result.map((item) => item.toDto());
+    const products = await product.getMany();
+    const users = await this.userRepository
+      .createQueryBuilder('user')
+      .where(
+        new Brackets((qb) => {
+          qb.where('LOWER(user.firstName) like :firstName', {
+            firstName: `%${search}%`,
+          });
+        }),
+      )
+      .getMany();
+
+    return {
+      products: products.map((item) => item.toDto()),
+      users: users.map((item) => item.toDto()),
+    };
   }
   private async _getNonBlockUsersProducts(
     user: UserEntity,

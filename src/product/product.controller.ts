@@ -19,6 +19,8 @@ import { AuthUser } from '../decorators/auth-user.decorator';
 import { UserEntity } from '../user/user.entity';
 import { ProductService } from './product.service';
 import { UpdateProductDto } from './dto/UpdateProductDto';
+import { UserDto } from '../user/dto/UserDto';
+import { SearchDto } from "./dto/SearchDto";
 
 @Controller('product')
 @ApiTags('product')
@@ -79,13 +81,13 @@ export class ProductController {
   @Get('search')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
-    type: [ProductDto],
+    type: SearchDto,
     description: 'search products',
   })
   async searchProduct(
     @AuthUser() user: UserEntity,
     @Query('search') search?: string,
-  ): Promise<ProductDto[]> {
+  ): Promise<SearchDto> {
     return this.productService.searchProduct(user, search);
   }
   @UseGuards(AuthGuard)
