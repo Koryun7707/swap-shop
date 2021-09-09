@@ -4,6 +4,7 @@ import * as mime from 'mime-types';
 
 import { IFile } from '../../interfaces/IFile';
 import { GeneratorService } from './generator.service';
+import { UserEntity } from '../../user/user.entity';
 
 @Injectable()
 export class AwsS3Service {
@@ -25,15 +26,18 @@ export class AwsS3Service {
     this._s3 = new AWS.S3(options);
   }
 
-  async uploadImage(file: IFile): Promise<string> {
-    const fileName = this.generatorService.fileName(
-      <string>mime.extension(file.mimetype),
-    );
+  async uploadImage(file: string, user: UserEntity): Promise<string> {
+    const fileName = this.generatorService.fileName('jpeg');
     const key = `images/${fileName}`;
+    const buf = Buffer.from(
+      file.replace(/^data:image\/\w+;base64,/, ''),
+      'base64',
+    );
     await this._s3
-      .putObject({
+      .upload({
+        ContentEncoding: 'base64',
         Bucket: process.env.S3_BUCKET_NAME,
-        Body: file.buffer,
+        Body: buf,
         ACL: 'public-read',
         Key: key,
         ContentType: 'image/jpeg',

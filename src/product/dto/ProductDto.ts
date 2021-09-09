@@ -51,5 +51,6 @@ export class ProductDto extends AbstractDto {
     this.title = product.title;
     this.dropOff = product.dropOff;
     this.images = product.images;
+    this.status = product.status;
   }
 }

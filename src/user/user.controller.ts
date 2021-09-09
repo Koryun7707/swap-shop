@@ -4,12 +4,10 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  Param,
   Post,
   Put,
-  UploadedFile,
+  Query,
   UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { AuthGuard } from '../guards/auth.guard';
@@ -19,8 +17,9 @@ import { UserDto } from './dto/UserDto';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../guards/jwt.auth.guard';
 import { UserUpdateDto } from './dto/UserUpdateDto';
-import { IFile } from '../interfaces/IFile';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { BlockedUserDto } from './dto/BlockedUserDto';
+import { UnBlockUserDto } from './dto/UnBlockUserDto';
+import { UploadImageDto } from './dto/UploadImageDto';
 
 @Controller('user')
 @ApiTags('user')
@@ -57,12 +56,36 @@ export class UserController {
   @ApiOkResponse({
     description: 'upload image',
   })
-  @UseInterceptors(FileInterceptor('file'))
   async uploadImage(
-    @Param('type') typeUpload: string,
-    @UploadedFile() file: IFile,
+    @Body() uploadImageDto: UploadImageDto,
     @AuthUser() user: UserEntity,
   ): Promise<UserDto> {
-    return this.userService.uploadImage(typeUpload, file, user);
+    return this.userService.uploadImage(uploadImageDto.file, user);
+  }
+  @UseGuards(AuthGuard)
+  @Post('blockUser')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    type: BlockedUserDto,
+    description: 'block user',
+  })
+  async blockUser(
+    @AuthUser() user: UserEntity,
+    @Body() blockedUserDto: BlockedUserDto,
+  ): Promise<UserDto> {
+    return this.userService.blockUser(user, blockedUserDto);
+  }
+  @UseGuards(AuthGuard)
+  @Post('unBlockUser')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    type: UnBlockUserDto,
+    description: 'un block user',
+  })
+  async unBlockUser(
+    @AuthUser() user: UserEntity,
+    @Query() { unBlockUserId }: any,
+  ): Promise<UserDto> {
+    return this.userService.unBlockUser(user, unBlockUserId);
   }
 }

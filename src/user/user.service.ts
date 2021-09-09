@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { UserRegisterDto } from '../auth/dto/UserRegisterDto';
 import { UserVerifyDto } from '../auth/dto/UserVerifyDto';
 import { UserEntity } from './user.entity';
@@ -7,28 +11,30 @@ import { UserDto } from './dto/UserDto';
 import * as bcrypt from 'bcrypt';
 import { FindConditions } from 'typeorm';
 import { UserUpdateDto } from './dto/UserUpdateDto';
-import { IFile } from '../interfaces/IFile';
-import { ValidatorService } from '../shared/services/validator.service';
-import { FileNotImageException } from '../exceptions/file-not-image.exception';
 import { AwsS3Service } from '../shared/services/aws-s3.service';
+import { MailService } from '../mail/mail.service';
+import { BlockedUserDto } from './dto/BlockedUserDto';
 
 @Injectable()
 export class UserService {
   constructor(
     public readonly userRepository: UserRepository,
     public readonly awsS3Service: AwsS3Service,
+    public readonly mailService: MailService,
   ) {}
 
   async findUser(userId: string): Promise<UserDto> {
     const user = await this.findOne({ id: userId });
     return new UserDto(user);
   }
+
   /**
    * Find single user
    */
   findOne(findData: FindConditions<UserEntity>): Promise<UserEntity> {
     return this.userRepository.findOne(findData);
   }
+
   /**
    * generate hash from password or string
    * @param {string} password
@@ -37,6 +43,7 @@ export class UserService {
   public generateHash(password: string): string {
     return bcrypt.hashSync(password, 10);
   }
+
   async createUser(userRegisterDto: UserRegisterDto): Promise<UserEntity> {
     const user = this.userRepository.create({
       ...userRegisterDto,
@@ -44,6 +51,7 @@ export class UserService {
     });
     return this.userRepository.save(user);
   }
+
   public async checkIfExists(email: string): Promise<boolean> {
     return (
       (await this.userRepository
@@ -52,6 +60,7 @@ export class UserService {
         .getCount()) > 0
     );
   }
+
   public async checkVerifyCode(email: string, code: number): Promise<boolean> {
     return (
       (await this.userRepository
@@ -61,14 +70,17 @@ export class UserService {
         .getCount()) > 0
     );
   }
-  public async checkIfUserVerify(): Promise<boolean> {
+
+  public async checkIfUserVerify(email: string): Promise<boolean> {
     return (
       (await this.userRepository
         .createQueryBuilder('user')
         .where('user.verified= :verified', { verified: true })
+        .andWhere('user.email= :email', { email })
         .getCount()) > 0
     );
   }
+
   async verifyUser(userVerifyDto: UserVerifyDto): Promise<UserDto> {
     await this.userRepository.update(
       { email: userVerifyDto.email },
@@ -80,11 +92,12 @@ export class UserService {
 
     return user.toDto();
   }
+
   async updateUser(
     user: UserEntity,
     userData: UserUpdateDto,
   ): Promise<UserDto> {
-    const verifyUser = await this.checkIfUserVerify();
+    const verifyUser = await this.checkIfUserVerify(user.email);
     if (!verifyUser) {
       throw new BadRequestException('user no verified');
     }
@@ -93,16 +106,9 @@ export class UserService {
 
     return new UserDto(updateUser);
   }
-  async uploadImage(
-    type: string,
-    file: IFile,
-    user: UserEntity,
-  ): Promise<UserDto> {
-    if (!file || !ValidatorService.isImage(file.mimetype)) {
-      throw new FileNotImageException();
-    }
 
-    const path = await this.awsS3Service.uploadImage(file);
+  async uploadImage(file: string, user: UserEntity): Promise<UserDto> {
+    const path = await this.awsS3Service.uploadImage(file, user);
 
     await this.userRepository.update(
       {
@@ -112,5 +118,55 @@ export class UserService {
     );
     const updateUser = await this.userRepository.findOne({ id: user.id });
     return updateUser.toDto();
+  }
+
+  async blockUser(
+    user: UserEntity,
+    blockedUserDto: BlockedUserDto,
+  ): Promise<UserDto> {
+    const userBlocked = await this.userRepository.findOne({
+      id: blockedUserDto.blockUserId,
+    });
+    if (!userBlocked) {
+      throw new NotFoundException('User not found');
+    }
+    return await this._block(userBlocked, user);
+  }
+
+  async unBlockUser(user: UserEntity, unBlockUserId: string): Promise<UserDto> {
+    const userBlocked = await this.userRepository.findOne({
+      id: unBlockUserId,
+    });
+    if (!userBlocked) {
+      throw new NotFoundException('User not found');
+    }
+    return await this._unBlock(userBlocked, user);
+  }
+
+  private async _unBlock(userBlocked: UserEntity, user: UserEntity) {
+    const index = userBlocked.blockedBy.indexOf(user.id);
+    const index1 = user.blocked.indexOf(userBlocked.id);
+    if (index === -1 || index1 === -1) {
+      throw new BadRequestException('user not blocked');
+    }
+    userBlocked.blockedBy.splice(index, 1);
+    await this.userRepository.save(userBlocked);
+    user.blocked.splice(index, 1);
+
+    return this.userRepository.save(user);
+  }
+  private async _block(userBlocked: UserEntity, user: UserEntity) {
+    userBlocked.blockedBy
+      ? userBlocked.blockedBy.push(user.id)
+      : (userBlocked.blockedBy = [user.id]);
+    userBlocked.blockedBy = [...new Set(userBlocked.blockedBy)];
+    await this.userRepository.save(userBlocked);
+    const userUpdate = await this.userRepository.findOne({ id: user.id });
+    userUpdate.blocked
+      ? userUpdate.blocked.push(userBlocked.id)
+      : (userUpdate.blocked = [userBlocked.id]);
+    userUpdate.blocked = [...new Set(userUpdate.blocked)];
+    await this.mailService.sendEmailWhenBlockUser(user, userBlocked);
+    return this.userRepository.save(userUpdate);
   }
 }

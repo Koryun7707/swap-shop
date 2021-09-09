@@ -34,6 +34,7 @@ export class AuthController {
   async userRegister(
     @Body() userRegisterDto: UserRegisterDto,
   ): Promise<UserDto> {
+    userRegisterDto.email = userRegisterDto.email.toLocaleLowerCase();
     const isExists = await this.userService.checkIfExists(
       userRegisterDto.email,
     );
@@ -54,13 +55,16 @@ export class AuthController {
   @Post('verifyOTP')
   @HttpCode(HttpStatus.OK)
   async verifyOTP(@Body() userVerifyDto: UserVerifyDto): Promise<UserDto> {
+    userVerifyDto.email = userVerifyDto.email.toLocaleLowerCase();
     const user = await this.userRepository.findOne({
       email: userVerifyDto.email,
     });
     if (!user) {
       throw new NotFoundException();
     }
-    const verifyUser = await this.userService.checkIfUserVerify();
+    const verifyUser = await this.userService.checkIfUserVerify(
+      userVerifyDto.email,
+    );
     if (verifyUser) {
       throw new BadRequestException('user has been verified');
     }
@@ -72,6 +76,21 @@ export class AuthController {
       throw new BadRequestException('incorrect code');
     }
     return await this.userService.verifyUser(userVerifyDto);
+  }
+  @Post('verifyCode')
+  @HttpCode(HttpStatus.OK)
+  async verifyCode(@Body() userVerifyDto: UserVerifyDto): Promise<boolean> {
+    userVerifyDto.email = userVerifyDto.email.toLocaleLowerCase();
+    const user = await this.userRepository.findOne({
+      email: userVerifyDto.email,
+    });
+    if (!user) {
+      throw new NotFoundException();
+    }
+    return await this.userService.checkVerifyCode(
+      userVerifyDto.email,
+      Number(userVerifyDto.code),
+    );
   }
   @Post('login')
   @HttpCode(HttpStatus.OK)

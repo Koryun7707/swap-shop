@@ -6,6 +6,9 @@ import * as morgan from 'morgan';
 import * as compression from 'compression';
 import * as RateLimit from 'express-rate-limit';
 import { setupSwagger } from './viveo-swagger';
+import { useContainer } from 'class-validator';
+import { RedisIoAdapter } from './adapters/redis.adapter';
+import * as bodyParser from 'body-parser';
 
 async function bootstrap() {
   const PORT = process.env.PORT || 5000;
@@ -19,17 +22,22 @@ async function bootstrap() {
   );
   app.use(compression());
   app.use(morgan('combined'));
+  app.useWebSocketAdapter(new RedisIoAdapter(app));
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true,
+      // whitelist: true,
       transform: true,
-      dismissDefaultMessages: true,
+      dismissDefaultMessages: false,
       validationError: {
         target: false,
       },
     }),
   );
   setupSwagger(app);
+  useContainer(app.select(AppModule), { fallbackOnErrors: true }); //for custom validation rules
+  app.use(bodyParser.json({ limit: '50mb' }));
+  app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+  app.enableCors();
   await app.listen(PORT, () => {
     console.log(`Server has been started on port ${PORT}`);
   });

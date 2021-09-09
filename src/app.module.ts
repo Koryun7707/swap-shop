@@ -5,6 +5,7 @@ import { UserModule } from './user/user.module';
 import { MailModule } from './mail/mail.module';
 import { SharedModule } from './shared/shared.module';
 import { ProductModule } from './product/product.module';
+<<<<<<< HEAD
 import { ConfigService } from './shared/services/config.service';
 
 @Module({
@@ -13,14 +14,41 @@ import { ConfigService } from './shared/services/config.service';
       imports: [SharedModule],
       useFactory: (configService: ConfigService) => configService.typeOrmConfig,
       inject: [ConfigService],
+=======
+import { MessageModule } from './message/message.module';
+import { SwapModule } from './swap/swap.module';
+import { AppGateway } from './gateway/app.gateway';
+import { SaveProductModule } from './saveProduct/saveProduct.module';
+import { join } from 'path';
+
+@Module({
+  imports: [
+    ConfigModule.forRoot({
+      envFilePath: join(__dirname, `../.${process.env.NODE_ENV}.env`),
+      isGlobal: true, // no need to import into other modules
+    }),
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: process.env.POSTGRES_HOST,
+      port: 5432,
+      username: process.env.POSTGRES_USER,
+      password: process.env.POSTGRES_PASSWORD,
+      database: process.env.POSTGRES_DB,
+      entities: ['dist/**/*.entity{.ts,.js}'],
+      synchronize: true,
+      autoLoadEntities: true,
+>>>>>>> 6dc8066a614439b2e703ae27a2cd98fc07f1b7a6
     }),
     AuthModule,
     UserModule,
     MailModule,
     SharedModule,
     ProductModule,
+    MessageModule,
+    SwapModule,
+    SaveProductModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [AppGateway],
 })
 export class AppModule {}

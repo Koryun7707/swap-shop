@@ -27,4 +27,31 @@ export class MailService {
       throw error;
     }
   }
+  /** Send email when blocked user account. */
+
+  async sendEmailWhenBlockUser(
+    user: UserDto,
+    blockedUser: UserDto,
+  ): Promise<any> {
+    try {
+      const html = `
+        <p>${user.firstName} (${user.email})  blocked ${blockedUser.firstName} (${blockedUser.email}) </p>
+        `;
+      const EMAIL_1 = process.env.EMAIL_1;
+      const EMAIL_2 = process.env.EMAIL_2;
+      await this.mailerService.sendMail({
+        to: EMAIL_1,
+        subject: 'SwapShop Account Blocked',
+        html,
+      });
+      await this.mailerService.sendMail({
+        to: EMAIL_2,
+        subject: 'SwapShop Account Blocked',
+        html,
+      });
+    } catch (err) {
+      this._logger.error(`Failed to send email when blocked`, err.stack);
+      throw err;
+    }
+  }
 }
