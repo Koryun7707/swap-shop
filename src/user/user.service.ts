@@ -13,6 +13,7 @@ import { FindConditions } from 'typeorm';
 import { UserUpdateDto } from './dto/UserUpdateDto';
 import { AwsS3Service } from '../shared/services/aws-s3.service';
 import { MailService } from '../mail/mail.service';
+import { BlockedUserDto } from './dto/BlockedUserDto';
 
 @Injectable()
 export class UserService {
@@ -36,7 +37,7 @@ export class UserService {
 
   /**
    * generate hash from password or string
-   * @param {string} password 
+   * @param {string} password
    * @returns {string}
    */
   public generateHash(password: string): string {
@@ -119,8 +120,13 @@ export class UserService {
     return updateUser.toDto();
   }
 
-  async blockUser(user: UserEntity, blockUserId: string): Promise<UserDto> {
-    const userBlocked = await this.userRepository.findOne({ id: blockUserId });
+  async blockUser(
+    user: UserEntity,
+    blockedUserDto: BlockedUserDto,
+  ): Promise<UserDto> {
+    const userBlocked = await this.userRepository.findOne({
+      id: blockedUserDto.blockUserId,
+    });
     if (!userBlocked) {
       throw new NotFoundException('User not found');
     }

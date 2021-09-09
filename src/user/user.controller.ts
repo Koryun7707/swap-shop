@@ -71,9 +71,9 @@ export class UserController {
   })
   async blockUser(
     @AuthUser() user: UserEntity,
-    @Body() blockUserId: string,
+    @Body() blockedUserDto: BlockedUserDto,
   ): Promise<UserDto> {
-    return this.userService.blockUser(user, blockUserId);
+    return this.userService.blockUser(user, blockedUserDto);
   }
   @UseGuards(AuthGuard)
   @Post('unBlockUser')
