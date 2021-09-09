@@ -133,9 +133,12 @@ export class UserService {
     return await this._block(userBlocked, user);
   }
 
-  async unBlockUser(user: UserEntity, unBlockUserId: string): Promise<UserDto> {
+  async unBlockUser(
+    user: UserEntity,
+    blockedUserDto: BlockedUserDto,
+  ): Promise<UserDto> {
     const userBlocked = await this.userRepository.findOne({
-      id: unBlockUserId,
+      id: blockedUserDto.blockUserId,
     });
     if (!userBlocked) {
       throw new NotFoundException('User not found');

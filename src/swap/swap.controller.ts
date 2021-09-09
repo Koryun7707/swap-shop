@@ -95,7 +95,7 @@ export class SwapController {
   }
 
   @UseGuards(AuthGuard)
-  @Get('seen-notification')
+  @Post('seen-notification')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     description: 'Make "seen" swap request',

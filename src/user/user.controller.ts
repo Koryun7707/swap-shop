@@ -6,7 +6,6 @@ import {
   HttpStatus,
   Post,
   Put,
-  Query,
   UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
@@ -84,8 +83,8 @@ export class UserController {
   })
   async unBlockUser(
     @AuthUser() user: UserEntity,
-    @Query() { unBlockUserId }: any,
+    @Body() blockedUserDto: BlockedUserDto,
   ): Promise<UserDto> {
-    return this.userService.unBlockUser(user, unBlockUserId);
+    return this.userService.unBlockUser(user, blockedUserDto);
   }
 }
