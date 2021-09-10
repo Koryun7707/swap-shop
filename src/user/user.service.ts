@@ -32,7 +32,7 @@ export class UserService {
       .where('user.id IN (:...blocked)', {
         blocked: user.blocked,
       })
-      .select(['user.profilePicture', 'user.firstName'])
+      .select(['user.profilePicture', 'user.firstName', 'user.id'])
       .getMany();
     return {
       user: user,
