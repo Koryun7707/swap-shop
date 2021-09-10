@@ -23,9 +23,7 @@ export class UserService {
     public readonly mailService: MailService,
   ) {}
 
-  async findUser(
-    userId: string,
-  ): Promise<{ user: UserEntity; blockedUsers: UserEntity[] }> {
+  async findUser(userId: string): Promise<any> {
     const user = await this.findOne({ id: userId });
     const blockedUsers = await this.userRepository
       .createQueryBuilder('user')
@@ -34,10 +32,8 @@ export class UserService {
       })
       .select(['user.profilePicture', 'user.firstName', 'user.id'])
       .getMany();
-    return {
-      user: user,
-      blockedUsers: blockedUsers,
-    };
+    const result = { ...user, blocked: blockedUsers };
+    return result;
   }
 
   /**

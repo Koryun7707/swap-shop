@@ -35,7 +35,7 @@ export class UserController {
   })
   async getUser(
     @AuthUser() user: UserEntity,
-  ): Promise<{ user: UserEntity; blockedUsers: UserEntity[] }> {
+  ): Promise<any> {
     return this.userService.findUser(user.id);
   }
   @UseGuards(AuthGuard)
