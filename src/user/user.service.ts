@@ -23,9 +23,21 @@ export class UserService {
     public readonly mailService: MailService,
   ) {}
 
-  async findUser(userId: string): Promise<UserDto> {
+  async findUser(
+    userId: string,
+  ): Promise<{ user: UserEntity; blockedUsers: UserEntity[] }> {
     const user = await this.findOne({ id: userId });
-    return new UserDto(user);
+    const blockedUsers = await this.userRepository
+      .createQueryBuilder('user')
+      .where('user.id IN (:...blocked)', {
+        blocked: user.blocked,
+      })
+      .select(['user.profilePicture', 'user.firstName'])
+      .getMany();
+    return {
+      user: user,
+      blockedUsers: blockedUsers,
+    };
   }
 
   /**
