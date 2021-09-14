@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -8,22 +9,39 @@ import { CreateSaveProductDto } from './dto/CreateSaveProductDto';
 import { SaveProductDto } from './dto/SaveProductDto';
 import { ProductRepository } from '../product/product.repository';
 import { SaveProductRepository } from './saveProduct.repository';
+import { UserRepository } from '../user/user.repository';
+import { ProductStatusEnum } from "../enums/product-status.enum";
 
 @Injectable()
 export class SaveProductService {
   constructor(
     public readonly productRepository: ProductRepository,
     public readonly saveProductRepository: SaveProductRepository,
+    public readonly userRepository: UserRepository,
   ) {}
   async saveProduct(
     user: UserEntity,
     createSaveProductDto: CreateSaveProductDto,
   ): Promise<SaveProductDto> {
-    const product = await this.productRepository.findOne({
-      where: {
+    const product = await this.productRepository
+      .createQueryBuilder('product')
+      .where('product.id = :id', {
         id: createSaveProductDto.productId,
-      },
-    });
+      })
+      .leftJoinAndSelect('product.user', 'user')
+      .andWhere(
+        '((NOT (user.blockedBy @> ARRAY[:blockedBy]::text[])) or user.blockedBy is null)',
+        {
+          blockedBy: user.id,
+        },
+      )
+      .andWhere(
+        '((NOT (user.blocked @> ARRAY[:blocked]::text[])) or user.blocked is null)',
+        {
+          blocked: user.id,
+        },
+      )
+      .getOne();
     if (!product) {
       throw new NotFoundException();
     }
@@ -44,12 +62,27 @@ export class SaveProductService {
     return saveProduct.toDto();
   }
   async getSaveProducts(user: UserEntity): Promise<SaveProductDto[]> {
-    const saveProducts = await this.saveProductRepository.find({
-      where: {
-        user,
-      },
-      relations: ['user', 'product'],
-    });
+    const saveProducts = await this.saveProductRepository
+      .createQueryBuilder('saveProduct')
+      .where('saveProduct.user = :user', {
+        user: user.id,
+      })
+      .leftJoinAndSelect('saveProduct.user', 'user')
+      .leftJoinAndSelect('saveProduct.product', 'product')
+      .andWhere(
+        '((NOT (user.blockedBy @> ARRAY[:blockedBy]::text[])) or user.blockedBy is null)',
+        {
+          blockedBy: user.id,
+        },
+      )
+      .andWhere(
+        '((NOT (user.blocked @> ARRAY[:blocked]::text[])) or user.blocked is null)',
+        {
+          blocked: user.id,
+        },
+      )
+      .andWhere(`product.status = '${ProductStatusEnum.NOT_SWAPPED}'`)
+      .getMany();
     return saveProducts.map((item) => item.toDto());
   }
   async deleteSaveProduct(user: UserEntity, id: string): Promise<void> {

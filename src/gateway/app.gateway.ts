@@ -73,7 +73,7 @@ export class AppGateway
   }
 
   handleConnection(client: Socket): void {
-        // const user = await this._socketGuard.connectAuth(client);
+    // const user = await this._socketGuard.connectAuth(client);
     // if (user) {
     //   const isOnline = true;
     //   const updatedUser = await this._boardUserOnlineService.createOrUpdate(

@@ -10,7 +10,9 @@ import { UserRepository } from '../user/user.repository';
 import { ProductEntity } from './product.entity';
 import { UpdateProductDto } from './dto/UpdateProductDto';
 import { UserDto } from '../user/dto/UserDto';
-import { SearchDto } from "./dto/SearchDto";
+import { SearchDto } from './dto/SearchDto';
+import { ProductStatusEnum } from '../enums/product-status.enum';
+import { where } from 'sequelize';
 
 @Injectable()
 export class ProductService {
@@ -104,10 +106,7 @@ export class ProductService {
     await this.productRepository.delete(id);
   }
 
-  async searchProduct(
-    user: UserEntity,
-    search?: string,
-  ): Promise<SearchDto> {
+  async searchProduct(user: UserEntity, search?: string): Promise<SearchDto> {
     search = search.toLowerCase();
     const product = this.productRepository
       .createQueryBuilder('product')
@@ -127,7 +126,20 @@ export class ProductService {
           );
         }),
       )
-      .andWhere('product.user != :userId', { userId: user.id });
+      .andWhere('product.user != :userId', { userId: user.id })
+      .andWhere(`product.status = '${ProductStatusEnum.NOT_SWAPPED}'`)
+      .andWhere(
+        '((NOT (user.blockedBy @> ARRAY[:blockedBy]::text[])) or user.blockedBy is null)',
+        {
+          blockedBy: user.id,
+        },
+      )
+      .andWhere(
+        '((NOT (user.blocked @> ARRAY[:blocked]::text[])) or user.blocked is null)',
+        {
+          blocked: user.id,
+        },
+      );
     const products = await product.getMany();
     const users = await this.userRepository
       .createQueryBuilder('user')
@@ -137,6 +149,18 @@ export class ProductService {
             firstName: `%${search}%`,
           });
         }),
+      )
+      .andWhere(
+        '((NOT (user.blockedBy @> ARRAY[:blockedBy]::text[])) or user.blockedBy is null)',
+        {
+          blockedBy: user.id,
+        },
+      )
+      .andWhere(
+        '((NOT (user.blocked @> ARRAY[:blocked]::text[])) or user.blocked is null)',
+        {
+          blocked: user.id,
+        },
       )
       .getMany();
 
@@ -158,14 +182,15 @@ export class ProductService {
         'user.id',
         'user.firstName',
         'user.description',
-      ]);
+      ])
+      .where(`product.status = '${ProductStatusEnum.NOT_SWAPPED}'`);
     if (userModel.blockedBy && userModel.blockedBy.length) {
-      product.where('product.user NOT IN (:...blockedBy)', {
+      product.andWhere('(product.user NOT IN (:...blockedBy))', {
         blockedBy: userModel.blockedBy,
       });
     }
     if (userModel.blocked && userModel.blocked.length) {
-      product.andWhere('product.user NOT IN (:...blocked)', {
+      product.andWhere('(product.user NOT IN (:...blocked))', {
         blocked: userModel.blocked,
       });
     }
