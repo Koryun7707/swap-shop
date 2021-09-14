@@ -5,6 +5,7 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   UpdateDateColumn,
 } from 'typeorm';
 import { AbstractEntity } from '../common/abstract.entity';
@@ -22,11 +23,14 @@ export class GroupEntity extends AbstractEntity<GroupDto> {
   })
   public type: GroupEnum;
 
-  @OneToMany(() => MessageEntity, (message) => message.group)
-  messages: MessageEntity[];
+  @OneToOne(() => MessageEntity, (message) => message.group)
+  lastMessage: string;
 
   @OneToMany(() => GroupUserEntity, (groupUser) => groupUser.group)
   groupUsers: GroupUserEntity[];
+
+  @Column('text', { nullable: true, array: true })
+  users: string[];
 
   @Column({ nullable: true })
   name: string;

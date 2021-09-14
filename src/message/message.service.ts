@@ -29,23 +29,27 @@ export class MessageService {
     if (!receiver) {
       throw new NotFoundException('User not found');
     }
-    const messages = await this.messageRepository
-      .createQueryBuilder('message')
-      .where('message.users @> ARRAY[:user]::text[]', {
-        user: user.id,
-      })
-      .andWhere('message.users @> ARRAY[:receiverId]::text[]', {
-        receiverId: createMessageDto.receiverId,
-      })
-      .leftJoinAndSelect('message.group', '_group')
-      .getOne();
-    let group: GroupEntity;
-    if (messages && messages.group) {
-      group = await this.groupRepository.findOne(messages.group.id);
-    } else {
-      const groupModel = await this.groupRepository.create({});
-      group = await this.groupRepository.save(groupModel);
+    const group = await this.groupRepository.findOne(createMessageDto.groupId);
+    if (!group) {
+      throw new NotFoundException('Group not found');
     }
+    // const messages = await this.messageRepository
+    //   .createQueryBuilder('message')
+    //   .where('message.users @> ARRAY[:user]::text[]', {
+    //     user: user.id,
+    //   })
+    //   .andWhere('message.users @> ARRAY[:receiverId]::text[]', {
+    //     receiverId: createMessageDto.receiverId,
+    //   })
+    //   .leftJoinAndSelect('message.group', '_group')
+    //   .getOne();
+    // let group: GroupEntity;
+    // if (messages && messages.group) {
+    //   group = await this.groupRepository.findOne(messages.group.id);
+    // } else {
+    //   const groupModel = await this.groupRepository.create({});
+    //   group = await this.groupRepository.save(groupModel);
+    // }
 
     const messageModel = new MessageEntity();
     messageModel.sender = user;
@@ -56,37 +60,38 @@ export class MessageService {
     createMessageDto.dropOff
       ? (messageModel.dropOff = createMessageDto.dropOff)
       : null;
-    messageModel.users = [receiver.id, user.id];
     messageModel.group = group;
 
     const message = await this.messageRepository.save(messageModel);
+    group.lastMessage = message.id;
+    await this.groupRepository.save(group);
     const messageDto = message.toDto();
-    const groupUserSender = await this.groupUserRepository.findOne({
-      where: {
-        group,
-        user,
-      },
-    });
-    const groupUserReceiver = await this.groupUserRepository.findOne({
-      where: {
-        group,
-        user,
-      },
-    });
-    if (!groupUserSender) {
-      const groupUserModel = await this.groupUserRepository.create({
-        group,
-        user,
-      });
-      await this.groupUserRepository.save(groupUserModel);
-    }
-    if (!groupUserReceiver) {
-      const groupUserModel = await this.groupUserRepository.create({
-        group,
-        user: receiver,
-      });
-      await this.groupUserRepository.save(groupUserModel);
-    }
+    // const groupUserSender = await this.groupUserRepository.findOne({
+    //   where: {
+    //     group,
+    //     user,
+    //   },
+    // });
+    // const groupUserReceiver = await this.groupUserRepository.findOne({
+    //   where: {
+    //     group,
+    //     user,
+    //   },
+    // });
+    // if (!groupUserSender) {
+    //   const groupUserModel = await this.groupUserRepository.create({
+    //     group,
+    //     user,
+    //   });
+    //   await this.groupUserRepository.save(groupUserModel);
+    // }
+    // if (!groupUserReceiver) {
+    //   const groupUserModel = await this.groupUserRepository.create({
+    //     group,
+    //     user: receiver,
+    //   });
+    //   await this.groupUserRepository.save(groupUserModel);
+    // }
     // Send socket event to created message
     const room = group.id;
     await this.appGateway.create(null, messageDto, room);
@@ -103,58 +108,76 @@ export class MessageService {
     if (!receiver) {
       throw new NotFoundException('User not found');
     }
-    const messageGroup = await this.messageRepository
-      .createQueryBuilder('message')
-      .leftJoinAndSelect('message.group', '_group')
-      .where('message.sender  = :sender', { sender: user.id })
-      .andWhere('message.users @> ARRAY[:receiverId]::text[]', {
+    let group = await this.groupRepository
+      .createQueryBuilder('group')
+      .where('group.users @> ARRAY[:sender]::text[]', { sender: user.id })
+      .andWhere('group.users @> ARRAY[:receiverId]::text[]', {
         receiverId,
       })
       .getOne();
-    let group: GroupEntity;
-    if (messageGroup) {
-      group = await this.groupRepository.findOne({
-        where: {
-          id: messageGroup.group.id,
-        },
+    if (!group) {
+      const groupModel = await this.groupRepository.create({
+        users: [receiver.id, user.id],
       });
-    } else {
-      const groupModel = await this.groupRepository.create({});
       group = await this.groupRepository.save(groupModel);
-      const messageModel = new MessageEntity();
-      messageModel.sender = user;
-      messageModel.users = [receiver.id, user.id];
-      messageModel.group = group;
-      const groupUserModelSender = await this.groupUserRepository.create({
-        group,
-        user,
-      });
-      await this.groupUserRepository.save(groupUserModelSender);
-      const groupUserModelReceiver = await this.groupUserRepository.create({
-        group,
-        user: receiver,
-      });
-      await this.groupUserRepository.save(groupUserModelReceiver);
-
-      await this.messageRepository.save(messageModel);
     }
-    return await this._getOneGroup(group.id);
+    // const messageGroup = await this.messageRepository
+    //   .createQueryBuilder('message')
+    //   .leftJoinAndSelect('message.group', '_group')
+    //   .where('message.sender  = :sender', { sender: user.id })
+    //   .andWhere('message.users @> ARRAY[:receiverId]::text[]', {
+    //     receiverId,
+    //   })
+    //   .getOne();
+    // let group: GroupEntity;
+    // if (messageGroup) {
+    //   group = await this.groupRepository.findOne({
+    //     where: {
+    //       id: messageGroup.group.id,
+    //     },
+    //   });
+    // } else {
+    //   const groupModel = await this.groupRepository.create({});
+    //   group = await this.groupRepository.save(groupModel);
+    //   const messageModel = new MessageEntity();
+    //   messageModel.sender = user;
+    //   messageModel.users = [receiver.id, user.id];
+    //   messageModel.group = group;
+    //   const groupUserModelSender = await this.groupUserRepository.create({
+    //     group,
+    //     user,
+    //   });
+    //   await this.groupUserRepository.save(groupUserModelSender);
+    //   const groupUserModelReceiver = await this.groupUserRepository.create({
+    //     group,
+    //     user: receiver,
+    //   });
+    //   await this.groupUserRepository.save(groupUserModelReceiver);
+
+    // await this.messageRepository.save(messageModel);
+    // }
+    return group;
   }
   async getAllMessagesByGroup(
     user: UserEntity,
     groupId: string,
+    query: { limit: number; offset: number },
   ): Promise<{
     messages: MessageDto[];
     receiver: UserEntity;
     senderId: string;
   }> {
+    const offset = query.offset ? query.offset : 0;
+    const limit = query.limit ? query.limit : 10;
     const group = await this.groupRepository.findOne(groupId);
     if (!group) {
       throw new NotFoundException('group');
     }
     const messages = await this.messageRepository
       .createQueryBuilder('message')
-      .where('message.users @> ARRAY[:user]::text[]', {
+      .where('message.group  = :groupId', { groupId })
+      .leftJoinAndSelect('message.group', '_group')
+      .andWhere('_group.users @> ARRAY[:user]::text[]', {
         user: user.id,
       })
       .leftJoinAndSelect('message.sender', '_sender')
@@ -165,20 +188,11 @@ export class MessageService {
         'message.messageImage',
         'message.dropOff',
       ])
-      .andWhere('message.group  = :groupId', { groupId })
       .orderBy('message.createdAt', 'ASC')
+      .offset(offset)
+      .limit(limit)
       .getMany();
-    const messageReceiver = await this.messageRepository
-      .createQueryBuilder('message')
-      .where('message.users @> ARRAY[:user]::text[]', {
-        user: user.id,
-      })
-      .andWhere('message.group  = :groupId', { groupId })
-      .orderBy('message.createdAt', 'ASC')
-      .getOne();
-    const receiverId = messageReceiver.users.splice(
-      messageReceiver.users.indexOf(user.id, 1),
-    );
+    const receiverId = group.users.splice(group.users.indexOf(user.id, 1));
     const receiver = await this.userRepository.findOne({
       where: {
         id: receiverId[0],
@@ -189,7 +203,7 @@ export class MessageService {
     return {
       messages: messages.map((item) => item.toDto()),
       receiver,
-      senderId: messageReceiver.users[0],
+      senderId: group.users[0],
     };
   }
   async getAllMessages(
@@ -222,15 +236,16 @@ export class MessageService {
   async getGroup(user: UserEntity): Promise<GroupEntity[]> {
     return await this.groupRepository
       .createQueryBuilder('group')
-      .leftJoinAndSelect('group.messages', '_messages')
-      .leftJoinAndSelect('group.groupUsers', '_groupUsers')
-      .leftJoinAndSelect('_groupUsers.lastReceived', '_lastReceived')
-      .leftJoinAndSelect('_groupUsers.lastRead', '_lastRead')
-      .leftJoinAndSelect('_groupUsers.user', '_user')
-      .where('_messages.users @> ARRAY[:user]::text[]', {
+      // .leftJoinAndSelect('group.messages', '_messages')
+      // .leftJoinAndSelect('group.groupUsers', '_groupUsers')
+      // .leftJoinAndSelect('_groupUsers.lastReceived', '_lastReceived')
+      // .leftJoinAndSelect('_groupUsers.lastRead', '_lastRead')
+      // .leftJoinAndSelect('_groupUsers.user', '_user')
+      .leftJoinAndSelect('group.lastMessage', '_lastMessage')
+      .where('group.users @> ARRAY[:user]::text[]', {
         user: user.id,
       })
-      .orderBy('_messages.createdAt', 'ASC')
+      .orderBy('group.createdAt', 'ASC')
       .getMany();
   }
   async delete(id: string, user: UserEntity): Promise<void> {

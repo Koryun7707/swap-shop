@@ -21,9 +21,6 @@ export class MessageEntity extends AbstractEntity<MessageDto> {
   @JoinColumn({ name: 'sender', referencedColumnName: 'id' })
   sender: UserEntity;
 
-  @Column('text', { nullable: true, array: true })
-  users: string[];
-
   @Column({ nullable: true })
   message: string;
 

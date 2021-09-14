@@ -26,6 +26,7 @@ export class UserService {
   async findUser(userId: string): Promise<any> {
     const user = await this.findOne({ id: userId });
     let blockedUsers = [];
+    let blockedByUsers = [];
     if (user.blocked && user.blocked.length) {
       blockedUsers = await this.userRepository
         .createQueryBuilder('user')
@@ -35,7 +36,20 @@ export class UserService {
         .select(['user.profilePicture', 'user.firstName', 'user.id'])
         .getMany();
     }
-    const result = { ...user, blocked: blockedUsers };
+    if (user.blockedBy && user.blockedBy.length) {
+      blockedByUsers = await this.userRepository
+        .createQueryBuilder('user')
+        .where('user.id IN (:...blockedBy)', {
+          blockedBy: user.blockedBy,
+        })
+        .select(['user.profilePicture', 'user.firstName', 'user.id'])
+        .getMany();
+    }
+    const result = {
+      ...user,
+      blocked: blockedUsers,
+      blockedBy: blockedByUsers,
+    };
     return result;
   }
 

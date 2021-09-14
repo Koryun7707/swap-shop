@@ -30,7 +30,6 @@ export class MessageDto extends AbstractDto {
     super(messageEntity);
     this.group = messageEntity.group;
     this.sender = messageEntity.sender;
-    this.users = messageEntity.users;
     this.message = messageEntity.message;
     this.messageImage = messageEntity.messageImage;
     this.dropOff = messageEntity.dropOff;
