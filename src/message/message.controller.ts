@@ -105,4 +105,26 @@ export class MessageController {
   ): Promise<void> {
     await this.messageService.delete(id, user);
   }
+  @UseGuards(AuthGuard)
+  @Post('readMessage/group/:id')
+  @HttpCode(200)
+  @ApiOkResponse({
+    type: GroupEntity,
+    description: 'read message',
+  })
+  async readMessage(
+    @AuthUser() user: UserEntity,
+    @Param('id') id: string,
+  ): Promise<GroupEntity> {
+    return await this.messageService.readMessage(id, user);
+  }
+  @UseGuards(AuthGuard)
+  @Get('check/unread')
+  @HttpCode(200)
+  @ApiOkResponse({
+    description: 'check unread message',
+  })
+  async checkUnreadMessage(@AuthUser() user: UserEntity): Promise<boolean> {
+    return await this.messageService.checkUnreadMessage(user);
+  }
 }

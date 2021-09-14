@@ -19,6 +19,7 @@ export class MessageService {
     public readonly messageRepository: MessageRepository,
     public readonly appGateway: AppGateway,
   ) {}
+
   async create(
     user: UserEntity,
     createMessageDto: CreateMessageDto,
@@ -98,6 +99,7 @@ export class MessageService {
 
     return messageDto;
   }
+
   async createGroupByReceiverId(
     user: UserEntity,
     receiverId: string,
@@ -158,6 +160,7 @@ export class MessageService {
     // }
     return group;
   }
+
   async getAllMessagesByGroup(
     user: UserEntity,
     groupId: string,
@@ -206,6 +209,7 @@ export class MessageService {
       senderId: group.users[0],
     };
   }
+
   async getAllMessages(
     user: UserEntity,
   ): Promise<{ count: number; messages: MessageDto[] }> {
@@ -221,6 +225,7 @@ export class MessageService {
       count: messages.length,
     };
   }
+
   private async _getOneGroup(groupId): Promise<GroupEntity> {
     return await this.groupRepository
       .createQueryBuilder('group')
@@ -233,6 +238,7 @@ export class MessageService {
       .orderBy('_messages.createdAt', 'ASC')
       .getOne();
   }
+
   async getGroup(user: UserEntity): Promise<GroupEntity[]> {
     return await this.groupRepository
       .createQueryBuilder('group')
@@ -248,6 +254,7 @@ export class MessageService {
       .orderBy('group.createdAt', 'ASC')
       .getMany();
   }
+
   async delete(id: string, user: UserEntity): Promise<void> {
     const message = await this.messageRepository.findOne({
       id,
@@ -257,5 +264,33 @@ export class MessageService {
       throw new NotFoundException();
     }
     await this.messageRepository.delete(id);
+  }
+
+  async readMessage(id: string, user: UserEntity): Promise<GroupEntity> {
+    const group = await this.groupRepository
+      .createQueryBuilder('group')
+      .where('group.users @> ARRAY[:user]::text[]', {
+        user: user.id,
+      })
+      .andWhere('group.id  = :id', { id })
+      .getOne();
+    if (!group) {
+      throw new NotFoundException('group not found');
+    }
+    group.readLastMessage = true;
+    return await this.groupRepository.save(group);
+  }
+  async checkUnreadMessage(user: UserEntity): Promise<boolean> {
+    const group = await this.groupRepository
+      .createQueryBuilder('group')
+      .where('group.users @> ARRAY[:user]::text[]', {
+        user: user.id,
+      })
+      .andWhere('group.readLastMessage  = true')
+      .getOne();
+    if (!group) {
+      return false;
+    }
+    return true;
   }
 }
