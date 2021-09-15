@@ -65,8 +65,8 @@ export class MessageService {
     }
     let group = await this.groupRepository
       .createQueryBuilder('group')
-      .where('group.users @> ARRAY[:sender]::text[]', { sender: user.id })
-      .andWhere('group.users @> ARRAY[:receiverId]::text[]', {
+      .where('group.users @> ARRAY[:sender]::uuid[]', { sender: user.id })
+      .andWhere('group.users @> ARRAY[:receiverId]::uuid[]', {
         receiverId,
       })
       .getOne();
@@ -76,7 +76,7 @@ export class MessageService {
       });
       group = await this.groupRepository.save(groupModel);
     }
-    return this._getOneGroup(group.id, user);
+    return await this._getOneGroup(group.id, user);
   }
 
   async getAllMessagesByGroup(
@@ -153,20 +153,17 @@ export class MessageService {
       })
       .leftJoinAndSelect('group.lastMessage', '_lastMessage')
       .leftJoinAndMapMany(
-        'group.sender',
+        'group.users',
         UserEntity,
         'user',
-        'user.id IN (:...sender)',
-        {
-          sender: [user.id],
-        },
+        'ARRAY[(user.id)] <@ (group.users)',
       )
       .orderBy('group.createdAt', 'ASC')
       .select([
         'group',
-        'sender.profilePicture',
-        'sender.id',
-        'sender.firstName',
+        'user.profilePicture',
+        'user.id',
+        'user.firstName',
         '_lastMessage',
       ])
       .getOne();
@@ -180,13 +177,10 @@ export class MessageService {
         user: user.id,
       })
       .leftJoinAndMapMany(
-        'group.sender',
+        'group.users',
         UserEntity,
         'user',
-        'user.id IN (:...sender)',
-        {
-          sender: [user.id],
-        },
+        'ARRAY[(user.id)] <@ (group.users)',
       )
       .orderBy('group.createdAt', 'ASC')
       .select([
@@ -213,7 +207,7 @@ export class MessageService {
   async readMessage(id: string, user: UserEntity): Promise<GroupEntity> {
     const group = await this.groupRepository
       .createQueryBuilder('group')
-      .where('group.users @> ARRAY[:user]::text[]', {
+      .where('group.users @> ARRAY[:user]::uuid[]', {
         user: user.id,
       })
       .andWhere('group.id  = :id', { id })
@@ -227,7 +221,7 @@ export class MessageService {
   async checkUnreadMessage(user: UserEntity): Promise<boolean> {
     const group = await this.groupRepository
       .createQueryBuilder('group')
-      .where('group.users @> ARRAY[:user]::text[]', {
+      .where('group.users @> ARRAY[:user]::uuid[]', {
         user: user.id,
       })
       .andWhere('group.readLastMessage  = true')

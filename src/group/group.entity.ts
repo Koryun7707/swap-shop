@@ -29,7 +29,7 @@ export class GroupEntity extends AbstractEntity<GroupDto> {
   @OneToMany(() => GroupUserEntity, (groupUser) => groupUser.group)
   groupUsers: GroupUserEntity[];
 
-  @Column('text', { nullable: true, array: true })
+  @Column('uuid', { nullable: true, array: true })
   users: string[];
 
   @Column({ nullable: true })
