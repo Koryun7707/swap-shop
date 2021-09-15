@@ -10,7 +10,7 @@ export class UserUpdateDto {
   @ApiProperty()
   lastName: string;
 
-  @IsNotEmpty({ message: 'address1 id is required' })
+  @IsNotEmpty({ message: 'address1q id is required' })
   @ApiProperty()
   address1: string;
 
