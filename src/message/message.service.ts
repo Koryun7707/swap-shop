@@ -242,16 +242,24 @@ export class MessageService {
   async getGroup(user: UserEntity): Promise<GroupEntity[]> {
     return await this.groupRepository
       .createQueryBuilder('group')
-      // .leftJoinAndSelect('group.messages', '_messages')
-      // .leftJoinAndSelect('group.groupUsers', '_groupUsers')
-      // .leftJoinAndSelect('_groupUsers.lastReceived', '_lastReceived')
-      // .leftJoinAndSelect('_groupUsers.lastRead', '_lastRead')
-      // .leftJoinAndSelect('_groupUsers.user', '_user')
       .leftJoinAndSelect('group.lastMessage', '_lastMessage')
       .where('group.users @> ARRAY[:user]::text[]', {
         user: user.id,
       })
+      .leftJoinAndMapMany(
+        'group.users',
+        UserEntity,
+        'user',
+        'group.users @> ARRAY[:user]::text[]',
+      )
       .orderBy('group.createdAt', 'ASC')
+      .select([
+        'group',
+        'user.profilePicture',
+        'user.id',
+        'user.firstName',
+        '_lastMessage',
+      ])
       .getMany();
   }
 

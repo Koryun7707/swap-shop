@@ -26,6 +26,7 @@ import { join } from 'path';
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
       entities: ['dist/**/*.entity{.ts,.js}'],
+      migrations: ['dist/**/migrations//*{.ts,.js}'],
       synchronize: true,
       autoLoadEntities: true,
     }),
