@@ -19,8 +19,7 @@ import { AuthUser } from '../decorators/auth-user.decorator';
 import { UserEntity } from '../user/user.entity';
 import { ProductService } from './product.service';
 import { UpdateProductDto } from './dto/UpdateProductDto';
-import { UserDto } from '../user/dto/UserDto';
-import { SearchDto } from "./dto/SearchDto";
+import { SearchDto } from './dto/SearchDto';
 
 @Controller('product')
 @ApiTags('product')

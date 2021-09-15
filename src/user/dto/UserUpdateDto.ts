@@ -18,10 +18,6 @@ export class UserUpdateDto {
   @ApiProperty()
   address2: string;
 
-  @IsNotEmpty({ message: 'gender id is required' })
-  @ApiProperty()
-  gender: string;
-
   @IsNotEmpty({ message: 'postCode id is required' })
   @ApiProperty()
   postCode: number;
