@@ -12,30 +12,20 @@ import { AppGateway } from './gateway/app.gateway';
 import { SaveProductModule } from './saveProduct/saveProduct.module';
 import { join } from 'path';
 import { ConfigService } from './shared/services/config.service';
+import { DatabaseConfig } from './common/database.config';
 
 @Module({
   imports: [
-    // ConfigModule.forRoot({
-    //   envFilePath: join(__dirname, `../.${process.env.NODE_ENV}.env`),
-    //   isGlobal: true, // no need to import into other modules
-    // }),
+    ConfigModule.forRoot({
+      envFilePath: join(__dirname, `../.${process.env.NODE_ENV}.env`),
+      isGlobal: true, // no need to import into other modules
+    }),
     TypeOrmModule.forRootAsync({
       imports: [SharedModule],
       useFactory: (configService: ConfigService) => configService.typeOrmConfig,
       inject: [ConfigService],
     }),
-    TypeOrmModule.forRoot({
-      // type: 'postgres',
-      // host: process.env.POSTGRES_HOST,
-      // port: 5432,
-      // username: process.env.POSTGRES_USER,
-      // password: process.env.POSTGRES_PASSWORD,
-      // database: process.env.POSTGRES_DB,
-      // entities: ['dist/**/*.entity{.ts,.js}'],
-      // migrations: ['dist/**/migrations//*{.ts,.js}'],
-      // synchronize: true,
-      // autoLoadEntities: true,
-    }),
+    TypeOrmModule.forRoot(DatabaseConfig),
     AuthModule,
     UserModule,
     MailModule,
