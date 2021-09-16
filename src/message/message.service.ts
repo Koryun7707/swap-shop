@@ -204,7 +204,11 @@ export class MessageService {
     await this.messageRepository.delete(id);
   }
 
-  async readMessage(id: string, user: UserEntity): Promise<GroupEntity> {
+  async readMessage(
+    id: string,
+    user: UserEntity,
+    lastMessageViewer: string,
+  ): Promise<GroupEntity> {
     const group = await this.groupRepository
       .createQueryBuilder('group')
       .where('group.users @> ARRAY[:user]::uuid[]', {
@@ -215,7 +219,7 @@ export class MessageService {
     if (!group) {
       throw new NotFoundException('group not found');
     }
-    group.readLastMessage = true;
+    group.lastMessageViewer = lastMessageViewer;
     return await this.groupRepository.save(group);
   }
   async checkUnreadMessage(user: UserEntity): Promise<boolean> {
@@ -224,7 +228,9 @@ export class MessageService {
       .where('group.users @> ARRAY[:user]::uuid[]', {
         user: user.id,
       })
-      .andWhere('group.readLastMessage  = true')
+      .andWhere('group.readLastMessage  = :id ', {
+        id: user.id,
+      })
       .getOne();
     if (!group) {
       return false;

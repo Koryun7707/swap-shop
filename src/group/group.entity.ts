@@ -36,10 +36,9 @@ export class GroupEntity extends AbstractEntity<GroupDto> {
   name: string;
 
   @Column({
-    nullable: false,
-    default: false,
+    nullable: true,
   })
-  readLastMessage: boolean;
+  lastMessageViewer: string;
 
   @CreateDateColumn({
     type: 'timestamp',

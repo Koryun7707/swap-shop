@@ -115,8 +115,9 @@ export class MessageController {
   async readMessage(
     @AuthUser() user: UserEntity,
     @Param('id') id: string,
+    @Body() lastMessageViewer: string,
   ): Promise<GroupEntity> {
-    return await this.messageService.readMessage(id, user);
+    return await this.messageService.readMessage(id, user, lastMessageViewer);
   }
   @UseGuards(AuthGuard)
   @Get('check/unread')
