@@ -12,6 +12,7 @@ import { AppGateway } from './gateway/app.gateway';
 import { SaveProductModule } from './saveProduct/saveProduct.module';
 import { join } from 'path';
 import { DatabaseConfig } from './common/database.config';
+import { ProductTypesModule } from './productTypes/productTypes.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { DatabaseConfig } from './common/database.config';
     MessageModule,
     SwapModule,
     SaveProductModule,
+    ProductTypesModule,
   ],
   controllers: [],
   providers: [AppGateway],
