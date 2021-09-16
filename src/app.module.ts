@@ -11,6 +11,8 @@ import { SwapModule } from './swap/swap.module';
 import { AppGateway } from './gateway/app.gateway';
 import { SaveProductModule } from './saveProduct/saveProduct.module';
 import { join } from 'path';
+import { DatabaseConfig } from './common/database.config';
+import { ProductTypesModule } from './productTypes/productTypes.module';
 
 @Module({
   imports: [
@@ -19,15 +21,7 @@ import { join } from 'path';
       isGlobal: true, // no need to import into other modules
     }),
     TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.POSTGRES_HOST,
-      port: 5432,
-      username: process.env.POSTGRES_USER,
-      password: process.env.POSTGRES_PASSWORD,
-      database: process.env.POSTGRES_DB,
-      entities: ['dist/**/*.entity{.ts,.js}'],
-      migrations: ['dist/**/migrations//*{.ts,.js}'],
-      synchronize: true,
+      ...DatabaseConfig,
       autoLoadEntities: true,
     }),
     AuthModule,
@@ -38,6 +32,7 @@ import { join } from 'path';
     MessageModule,
     SwapModule,
     SaveProductModule,
+    ProductTypesModule,
   ],
   controllers: [],
   providers: [AppGateway],

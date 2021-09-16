@@ -1,7 +1,4 @@
-import {
-  Column,
-  Entity,
-} from 'typeorm';
+import { Column, Entity } from 'typeorm';
 import { AbstractEntity } from '../common/abstract.entity';
 import { ProductTypesDto } from './dto/ProductTypesDto';
 import { ProductDto } from '../product/dto/ProductDto';
