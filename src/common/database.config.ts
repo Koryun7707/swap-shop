@@ -19,7 +19,7 @@ export const DatabaseConfig: ConnectionOptions = {
   entities: ['dist/**/*.entity{.ts,.js}'],
   migrations: ['dist/**/migrations//*{.ts,.js}'],
   synchronize: true,
-  migrationsRun: false,
+  migrationsRun: true,
 };
 
 export default DatabaseConfig;

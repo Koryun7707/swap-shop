@@ -11,7 +11,6 @@ import { SwapModule } from './swap/swap.module';
 import { AppGateway } from './gateway/app.gateway';
 import { SaveProductModule } from './saveProduct/saveProduct.module';
 import { join } from 'path';
-import { ConfigService } from './shared/services/config.service';
 import { DatabaseConfig } from './common/database.config';
 
 @Module({
@@ -20,12 +19,10 @@ import { DatabaseConfig } from './common/database.config';
       envFilePath: join(__dirname, `../.${process.env.NODE_ENV}.env`),
       isGlobal: true, // no need to import into other modules
     }),
-    TypeOrmModule.forRootAsync({
-      imports: [SharedModule],
-      useFactory: (configService: ConfigService) => configService.typeOrmConfig,
-      inject: [ConfigService],
+    TypeOrmModule.forRoot({
+      ...DatabaseConfig,
+      autoLoadEntities: true,
     }),
-    TypeOrmModule.forRoot(DatabaseConfig),
     AuthModule,
     UserModule,
     MailModule,
