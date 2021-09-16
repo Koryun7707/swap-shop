@@ -228,7 +228,7 @@ export class MessageService {
       .where('group.users @> ARRAY[:user]::uuid[]', {
         user: user.id,
       })
-      .andWhere('group.readLastMessage  = :id ', {
+      .andWhere('group.lastMessageViewer  = :id ', {
         id: user.id,
       })
       .getOne();
