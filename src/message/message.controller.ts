@@ -19,6 +19,7 @@ import { UserEntity } from '../user/user.entity';
 import { CreateMessageDto } from './dto/CreateMessageDto';
 import { MessageService } from './message.service';
 import { GroupEntity } from '../group/group.entity';
+import { LastMessageViewerDto } from './dto/LastMessageViewerDto';
 
 @Controller('message')
 @ApiTags('message')
@@ -115,9 +116,13 @@ export class MessageController {
   async readMessage(
     @AuthUser() user: UserEntity,
     @Param('id') id: string,
-    @Body() lastMessageViewer: string,
+    @Body() lastMessageViewerDto: LastMessageViewerDto,
   ): Promise<GroupEntity> {
-    return await this.messageService.readMessage(id, user, lastMessageViewer);
+    return await this.messageService.readMessage(
+      id,
+      user,
+      lastMessageViewerDto,
+    );
   }
   @UseGuards(AuthGuard)
   @Get('check/unread')

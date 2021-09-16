@@ -8,6 +8,7 @@ import { MessageRepository } from './message.repository';
 import { AppGateway } from '../gateway/app.gateway';
 import { GroupRepository } from '../group/group.repository';
 import { GroupEntity } from '../group/group.entity';
+import { LastMessageViewerDto } from "./dto/LastMessageViewerDto";
 
 @Injectable()
 export class MessageService {
@@ -207,7 +208,7 @@ export class MessageService {
   async readMessage(
     id: string,
     user: UserEntity,
-    lastMessageViewer: string,
+    lastMessageViewerDto: LastMessageViewerDto,
   ): Promise<GroupEntity> {
     const group = await this.groupRepository
       .createQueryBuilder('group')
@@ -219,7 +220,7 @@ export class MessageService {
     if (!group) {
       throw new NotFoundException('group not found');
     }
-    group.lastMessageViewer = lastMessageViewer;
+    group.lastMessageViewer = lastMessageViewerDto.id;
     return await this.groupRepository.save(group);
   }
   async checkUnreadMessage(user: UserEntity): Promise<boolean> {
