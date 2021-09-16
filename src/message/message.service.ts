@@ -98,7 +98,7 @@ export class MessageService {
       .createQueryBuilder('message')
       .where('message.group  = :groupId', { groupId })
       .leftJoinAndSelect('message.group', '_group')
-      .andWhere('_group.users @> ARRAY[:user]::text[]', {
+      .andWhere('_group.users @> ARRAY[:user]::uuid[]', {
         user: user.id,
       })
       .leftJoinAndSelect('message.sender', '_sender')
