@@ -3,16 +3,13 @@ import { UserEntity } from '../user/user.entity';
 import { UploadProductDto } from './dto/UploadProductDto';
 import { ProductDto } from './dto/ProductDto';
 import { ProductRepository } from './product.repository';
-import { IFile } from '../interfaces/IFile';
 import { AwsS3Service } from '../shared/services/aws-s3.service';
 import { Brackets } from 'typeorm';
 import { UserRepository } from '../user/user.repository';
 import { ProductEntity } from './product.entity';
 import { UpdateProductDto } from './dto/UpdateProductDto';
-import { UserDto } from '../user/dto/UserDto';
 import { SearchDto } from './dto/SearchDto';
 import { ProductStatusEnum } from '../enums/product-status.enum';
-import { where } from 'sequelize';
 
 @Injectable()
 export class ProductService {

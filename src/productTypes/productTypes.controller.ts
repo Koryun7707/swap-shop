@@ -1,11 +1,11 @@
 import {
-  Controller, Get,
+  Controller,
+  Get,
   HttpCode,
   HttpStatus,
-  Post,
   Query,
-  UseGuards
-} from "@nestjs/common";
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '../guards/auth.guard';
 import { AuthUser } from '../decorators/auth-user.decorator';

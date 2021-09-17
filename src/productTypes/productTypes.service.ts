@@ -17,7 +17,7 @@ export class ProductTypesService {
       .where(
         new Brackets((qb) => {
           qb.where('LOWER(productTypes.name) like :name', {
-            name: `%${search}%`,
+            name: `${search}%`,
           });
         }),
       )

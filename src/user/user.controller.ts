@@ -33,9 +33,7 @@ export class UserController {
     type: UserDto,
     description: 'get user',
   })
-  async getUser(
-    @AuthUser() user: UserEntity,
-  ): Promise<any> {
+  async getUser(@AuthUser() user: UserEntity): Promise<any> {
     return this.userService.findUser(user.id);
   }
   @UseGuards(AuthGuard)
