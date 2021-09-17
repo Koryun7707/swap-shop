@@ -81,7 +81,6 @@ export class SaveProductService {
           blocked: user.id,
         },
       )
-      .andWhere(`product.status = '${ProductStatusEnum.NOT_SWAPPED}'`)
       .getMany();
     return saveProducts.map((item) => item.toDto());
   }
