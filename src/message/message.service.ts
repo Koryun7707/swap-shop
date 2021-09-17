@@ -45,9 +45,7 @@ export class MessageService {
     messageModel.group = group;
 
     const message = await this.messageRepository.save(messageModel);
-    console.log(message,111);
     group.lastMessage = message.id;
-    console.log(group,999);
     await this.groupRepository.save(group);
     const messageDto = message.toDto();
     const room = group.id;
