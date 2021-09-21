@@ -2,7 +2,7 @@ version: "3"
 services:
   app:
     env_file:
-      - .development.env
+      - .production.env
     container_name: awesome_nest_boilerplate
     restart: always
     build: .
@@ -14,7 +14,7 @@ services:
     image: postgres
     restart: always
     env_file:
-      - .development.env
+      - .production.env
     ports:
       - "5433:5432"
     volumes:
