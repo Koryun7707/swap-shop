@@ -4,23 +4,23 @@ import { UserDto } from './dto/UserDto';
 
 @Entity({ name: 'user' })
 export class UserEntity extends AbstractEntity<UserDto> {
-  @Column({ nullable: true })
+  @Column({ default: '', nullable: true })
   firstName: string;
 
-  @Column({ nullable: true })
+  @Column({ default: '', nullable: true })
   lastName: string;
 
-  @Column({ nullable: true })
+  @Column({ default: '', nullable: true })
   address1: string;
 
-  @Column({ nullable: true })
+  @Column({ default: '', nullable: true })
   address2: string;
 
-  @Column({ nullable: true })
+  @Column({ default: '', nullable: true })
   gender: string;
 
-  @Column({ nullable: true })
-  postCode: number;
+  @Column({ default: '', nullable: true })
+  postCode: string;
 
   @Column({ nullable: false })
   email: string;
@@ -28,10 +28,10 @@ export class UserEntity extends AbstractEntity<UserDto> {
   @Column({ nullable: false })
   password: string;
 
-  @Column({ nullable: true })
+  @Column({ default: '', nullable: true })
   profilePicture: string;
 
-  @Column({ nullable: true })
+  @Column({ default: '', nullable: true })
   age: string;
 
   @Column('text', { nullable: true, array: true })
@@ -40,7 +40,7 @@ export class UserEntity extends AbstractEntity<UserDto> {
   @Column('text', { nullable: true, array: true })
   blockedBy: string[];
 
-  @Column({ nullable: true })
+  @Column({ default: '', nullable: true })
   description: string;
 
   @Column({ name: 'verified', default: false })

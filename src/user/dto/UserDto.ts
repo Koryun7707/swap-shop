@@ -22,7 +22,7 @@ export class UserDto extends AbstractDto {
   gender: string;
 
   @ApiPropertyOptional()
-  postCode: number;
+  postCode: string;
 
   @ApiPropertyOptional()
   email: string;
