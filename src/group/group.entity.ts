@@ -23,8 +23,10 @@ export class GroupEntity extends AbstractEntity<GroupDto> {
   })
   public type: GroupEnum;
 
-  @OneToOne(() => MessageEntity)
-  @JoinColumn({ name: 'lastMessage', referencedColumnName: 'id' })
+  // @OneToOne(() => MessageEntity)
+  // @JoinColumn({ name: 'lastMessage', referencedColumnName: 'id' })
+  // lastMessage: string;
+  @Column({ nullable: true })
   lastMessage: string;
 
   @OneToMany(() => GroupUserEntity, (groupUser) => groupUser.group)

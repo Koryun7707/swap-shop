@@ -25,6 +25,9 @@ export class UserEntity extends AbstractEntity<UserDto> {
   @Column({ nullable: false })
   email: string;
 
+  @Column({ name: 'completedProfile', default: false })
+  completedProfile: boolean;
+
   @Column({ nullable: false })
   password: string;
 

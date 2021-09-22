@@ -126,7 +126,10 @@ export class UserService {
     if (!verifyUser) {
       throw new BadRequestException('user no verified');
     }
-    await this.userRepository.update({ id: user.id }, userData);
+    await this.userRepository.update(
+      { id: user.id },
+      { ...userData, completedProfile: true },
+    );
     const updateUser = await this.userRepository.findOne({ id: user.id });
 
     return new UserDto(updateUser);
