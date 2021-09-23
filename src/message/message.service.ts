@@ -206,7 +206,7 @@ export class MessageService {
         'user',
         'ARRAY[(user.id)] <@ (group.users)',
       )
-      .orderBy('group.createdAt', 'ASC')
+      .orderBy('_lastMessage.createdAt', 'ASC')
       .select([
         'group',
         'user.profilePicture',
