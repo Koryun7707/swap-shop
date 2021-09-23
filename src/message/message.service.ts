@@ -188,14 +188,14 @@ export class MessageService {
         user: user.id,
       })
       .andWhere(
-        '(NOT(group.users @> ARRAY[:...blockedBy]::uuid[]) or array_length(ARRAY[:...blockedBy]::uuid[],1) IS NULL)',
+        '(NOT(group.users && ARRAY[:...blockedBy]::uuid[]) or array_length(ARRAY[:...blockedBy]::uuid[],1) IS NULL)',
         {
           blockedBy:
             !user.blockedBy || user.blockedBy[0] === '' ? [] : user.blockedBy,
         },
       )
       .andWhere(
-        '(NOT(group.users @> ARRAY[:...blocked]::uuid[]) or array_length(ARRAY[:...blocked]::uuid[],1) IS NULL)',
+        '(NOT(group.users && ARRAY[:...blocked]::uuid[]) or array_length(ARRAY[:...blocked]::uuid[],1) IS NULL)',
         {
           blocked: !user.blocked || user.blocked[0] === '' ? [] : user.blocked,
         },
