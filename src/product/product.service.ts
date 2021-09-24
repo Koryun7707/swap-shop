@@ -117,7 +117,6 @@ export class ProductService {
               name: `%${search}%`,
               brandName: `%${search}%`,
               size: `%${search}%`,
-              color: `%${search}%`,
               title: `%${search}%`,
             },
           );
