@@ -125,13 +125,13 @@ export class ProductService {
       .andWhere('product.user != :userId', { userId: user.id })
       .andWhere(`product.status = '${ProductStatusEnum.NOT_SWAPPED}'`)
       .andWhere(
-        '((NOT (user.blockedBy @> ARRAY[:blockedBy]::text[])) or (user.blockedBy is null and user.blocked is null))',
+        '((NOT (user.blockedBy @> ARRAY[:blockedBy]::text[])) or (user.blockedBy is null))',
         {
           blockedBy: user.id,
         },
       )
       .andWhere(
-        '((NOT (user.blocked @> ARRAY[:blocked]::text[])) or (user.blockedBy is null and user.blocked is null))',
+        '((NOT (user.blocked @> ARRAY[:blocked]::text[])) or (user.blocked is null))',
         {
           blocked: user.id,
         },
@@ -147,13 +147,13 @@ export class ProductService {
         }),
       )
       .andWhere(
-        '((NOT (user.blockedBy @> ARRAY[:blockedBy]::text[])) or (user.blockedBy is null and user.blocked is null) )',
+        '((NOT (user.blockedBy @> ARRAY[:blockedBy]::text[])) or (user.blockedBy is null) )',
         {
           blockedBy: user.id,
         },
       )
       .andWhere(
-        '((NOT (user.blocked @> ARRAY[:blocked]::text[])) or (user.blockedBy is null and user.blocked is null) )',
+        '((NOT (user.blocked @> ARRAY[:blocked]::text[])) or (user.blockedBy is null ) )',
         {
           blocked: user.id,
         },
