@@ -36,7 +36,7 @@ export class SaveProductService {
         },
       )
       .andWhere(
-        '((NOT (user.blocked @> ARRAY[:blocked]::text[])) or (user.blockedBy is null ) )',
+        '((NOT (user.blocked @> ARRAY[:blocked]::text[])) or (user.blocked is null ) )',
         {
           blocked: user.id,
         },
