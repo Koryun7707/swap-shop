@@ -182,7 +182,7 @@ export class UserService {
     }
     userBlocked.blockedBy.splice(index, 1);
     await this.userRepository.save(userBlocked);
-    user.blocked.splice(index, 1);
+    user.blocked.splice(index1, 1);
 
     return this.userRepository.save(user);
   }
