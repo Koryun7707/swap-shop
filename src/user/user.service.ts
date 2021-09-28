@@ -152,13 +152,7 @@ export class UserService {
     user: UserEntity,
     blockedUserDto: BlockedUserDto,
   ): Promise<UserDto> {
-    const userBlocked = await this.userRepository.findOne({
-      id: blockedUserDto.blockUserId,
-    });
-    if (!userBlocked) {
-      throw new NotFoundException('User not found');
-    }
-    return await this._block(userBlocked, user);
+    return await this._block(blockedUserDto.blockUserId, user);
   }
 
   async unBlockUser(
@@ -186,11 +180,18 @@ export class UserService {
 
     return this.userRepository.save(user);
   }
-  private async _block(userBlocked: UserEntity, user: UserEntity) {
+  private async _block(blockUserId: string, user: UserEntity) {
+    const userBlocked = await this.userRepository.findOne({
+      id: blockUserId,
+    });
+    if (!userBlocked) {
+      throw new NotFoundException('User not found');
+    }
     userBlocked.blockedBy
       ? userBlocked.blockedBy.push(user.id)
       : (userBlocked.blockedBy = [user.id]);
     userBlocked.blockedBy = [...new Set(userBlocked.blockedBy)];
+
     await this.userRepository.save(userBlocked);
     const userUpdate = await this.userRepository.findOne({ id: user.id });
     userUpdate.blocked
