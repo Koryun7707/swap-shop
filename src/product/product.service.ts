@@ -73,7 +73,13 @@ export class ProductService {
       .createQueryBuilder('product')
       .where('product.user = :userId', { userId: user.id })
       .leftJoinAndSelect('product.user', 'user')
-      .select(['product', 'user.profilePicture', 'user.id', 'user.firstName'])
+      .select([
+        'product',
+        'user.profilePicture',
+        'user.id',
+        'user.firstName',
+        'user.lastName',
+      ])
       .orderBy('product.createdAt', 'DESC');
 
     const result = await productsModel.getMany();
@@ -108,7 +114,13 @@ export class ProductService {
     const product = this.productRepository
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.user', 'user')
-      .select(['product', 'user.profilePicture', 'user.id', 'user.firstName'])
+      .select([
+        'product',
+        'user.profilePicture',
+        'user.id',
+        'user.firstName',
+        'user.lastName',
+      ])
       .where(
         new Brackets((qb) => {
           qb.where(
@@ -177,6 +189,7 @@ export class ProductService {
         'user.profilePicture',
         'user.id',
         'user.firstName',
+        'user.lastName',
         'user.description',
       ])
       .where(`product.status = '${ProductStatusEnum.NOT_SWAPPED}'`);
