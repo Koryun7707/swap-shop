@@ -5,10 +5,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserRepository } from './user.repository';
 import { UserExistsRule } from '../common/validators/user-exist.validation';
 import { MailModule } from '../mail/mail.module';
+import { StoreTokenRepository } from '../store_token/storeToken.repository';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UserRepository]),
+    TypeOrmModule.forFeature([UserRepository, StoreTokenRepository]),
     forwardRef(() => MailModule),
   ],
   controllers: [UserController],

@@ -9,6 +9,9 @@ import { AppGateway } from '../gateway/app.gateway';
 import { GroupRepository } from '../group/group.repository';
 import { GroupEntity } from '../group/group.entity';
 import { LastMessageViewerDto } from './dto/LastMessageViewerDto';
+import fetch from 'node-fetch';
+import { StoreTokenRepository } from '../store_token/storeToken.repository';
+import { Notifications } from '../common/constants/notifactions';
 
 @Injectable()
 export class MessageService {
@@ -17,6 +20,7 @@ export class MessageService {
     public readonly groupRepository: GroupRepository,
     public readonly messageRepository: MessageRepository,
     public readonly appGateway: AppGateway,
+    public readonly storeTokenRepository: StoreTokenRepository,
   ) {}
 
   async create(
@@ -50,10 +54,52 @@ export class MessageService {
     const messageDto = message.toDto();
     const room = group.id;
     await this.appGateway.create(null, messageDto, room);
-
+    await this.sendFirebaseNotification(
+      receiver,
+      message,
+      Notifications.NEW_MESSAGE,
+    );
     return messageDto;
   }
-
+  async sendFirebaseNotification(
+    user: UserEntity,
+    message: MessageEntity,
+    type,
+  ) {
+    const storeToken = await this.storeTokenRepository.findOne({
+      where: {
+        userId: user.id,
+      },
+    });
+    if (!storeToken) {
+      throw new NotFoundException('storeToken');
+    }
+    const key = process.env.FIREBASE_SERVER_KEY;
+    const url = process.env.FIREBASE_FCM_URL;
+    const notification = {
+      title: type,
+      body: message.message,
+    };
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: 'key=' + key,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        notification: notification,
+        to: storeToken.token,
+        message,
+      }),
+    })
+      .then(async function (response) {
+        response = await response.json();
+        console.log(response);
+      })
+      .catch(function (error) {
+        console.error(error);
+      });
+  }
   async createGroupByReceiverId(
     user: UserEntity,
     receiverId: string,

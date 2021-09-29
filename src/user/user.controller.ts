@@ -19,6 +19,8 @@ import { UserUpdateDto } from './dto/UserUpdateDto';
 import { BlockedUserDto } from './dto/BlockedUserDto';
 import { UnBlockUserDto } from './dto/UnBlockUserDto';
 import { UploadImageDto } from './dto/UploadImageDto';
+import { StoreTokenDto } from '../store_token/dto/StoreTokenDto';
+import { CreateStoreTokenDto } from '../store_token/dto/CreateStoreTokenDto';
 
 @Controller('user')
 @ApiTags('user')
@@ -86,5 +88,18 @@ export class UserController {
     @Body() blockedUserDto: BlockedUserDto,
   ): Promise<UserDto> {
     return this.userService.unBlockUser(user, blockedUserDto);
+  }
+  @UseGuards(AuthGuard)
+  @Post('storeFirebaseToken')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    type: CreateStoreTokenDto,
+    description: 'storeFirebaseToken',
+  })
+  async storeToken(
+    @AuthUser() user: UserEntity,
+    @Body() createStoreTokenDto: CreateStoreTokenDto,
+  ): Promise<StoreTokenDto> {
+    return this.userService.storeToken(user, createStoreTokenDto);
   }
 }
