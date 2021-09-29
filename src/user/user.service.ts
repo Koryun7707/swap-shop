@@ -14,16 +14,11 @@ import { UserUpdateDto } from './dto/UserUpdateDto';
 import { AwsS3Service } from '../shared/services/aws-s3.service';
 import { MailService } from '../mail/mail.service';
 import { BlockedUserDto } from './dto/BlockedUserDto';
-import { StoreTokenDto } from '../store_token/dto/StoreTokenDto';
-import { CreateStoreTokenDto } from '../store_token/dto/CreateStoreTokenDto';
-import { StoreTokenRepository } from '../store_token/storeToken.repository';
-import { StoreTokenEntity } from '../store_token/storeToken.entity';
 
 @Injectable()
 export class UserService {
   constructor(
     public readonly userRepository: UserRepository,
-    public readonly storeTokenRepository: StoreTokenRepository,
     public readonly awsS3Service: AwsS3Service,
     public readonly mailService: MailService,
   ) {}
@@ -172,26 +167,6 @@ export class UserService {
     }
     return await this._unBlock(userBlocked, user);
   }
-  async storeToken(
-    user: UserEntity,
-    createStoreTokenDto: CreateStoreTokenDto,
-  ): Promise<StoreTokenDto> {
-    let storeToken = await this.storeTokenRepository.findOne({
-      userId: user.id,
-    });
-    if (!storeToken) {
-      const newStoreToken = new StoreTokenEntity();
-      newStoreToken.userId = user.id;
-      newStoreToken.token = createStoreTokenDto.token;
-      storeToken = await this.storeTokenRepository.save(newStoreToken);
-    } else {
-      storeToken.token = createStoreTokenDto.token;
-      storeToken = await this.storeTokenRepository.save(storeToken);
-    }
-
-    return storeToken;
-  }
-
   private async _unBlock(userBlocked: UserEntity, user: UserEntity) {
     const index = userBlocked.blockedBy.indexOf(user.id);
     const index1 = user.blocked.indexOf(userBlocked.id);

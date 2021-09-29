@@ -9,6 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
+import { StoreTokenService } from '../store_token/storeToken.service';
 import { AuthGuard } from '../guards/auth.guard';
 import { AuthUser } from '../decorators/auth-user.decorator';
 import { UserEntity } from './user.entity';
@@ -27,7 +28,10 @@ import { CreateStoreTokenDto } from '../store_token/dto/CreateStoreTokenDto';
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 export class UserController {
-  constructor(public readonly userService: UserService) {}
+  constructor(
+    public readonly userService: UserService,
+    public readonly storeTokenService: StoreTokenService
+  ) {}
   @UseGuards(AuthGuard)
   @Get('')
   @HttpCode(HttpStatus.OK)
@@ -100,6 +104,6 @@ export class UserController {
     @AuthUser() user: UserEntity,
     @Body() createStoreTokenDto: CreateStoreTokenDto,
   ): Promise<StoreTokenDto> {
-    return this.userService.storeToken(user, createStoreTokenDto);
+    return this.storeTokenService.createOrUpdate(user, createStoreTokenDto);
   }
 }
