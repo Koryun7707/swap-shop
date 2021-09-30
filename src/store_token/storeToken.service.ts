@@ -46,6 +46,10 @@ export class StoreTokenService {
     const notification = {
       title: title,
       body: bodyText,
+      data:{
+        type,
+        groupId,
+      }
     };
     const key = process.env.FIREBASE_SERVER_KEY;
     const url = process.env.FIREBASE_FCM_URL;
@@ -59,8 +63,6 @@ export class StoreTokenService {
         notification: notification,
         to: storeToken.token,
         bodyText,
-        type,
-        groupId,
       }),
     })
       .then(async function (response) {
