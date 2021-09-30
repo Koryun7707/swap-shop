@@ -39,6 +39,7 @@ export class StoreTokenService {
     }
     const key = process.env.FIREBASE_SERVER_KEY;
     const url = process.env.FIREBASE_FCM_URL;
+    console.log(url,1111);
     const notification = {
       title: type,
       body: bodyText,
