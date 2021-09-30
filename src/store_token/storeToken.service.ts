@@ -58,9 +58,11 @@ export class StoreTokenService {
       body: JSON.stringify({
         notification: notification,
         to: storeToken.token,
-        bodyText,
-        type,
-        groupId
+        data: {
+          bodyText,
+          type,
+          groupId,
+        },
       }),
     })
       .then(async function (response) {
