@@ -55,16 +55,10 @@ export class MessageService {
     const messageDto = message.toDto();
     const room = group.id;
     await this.appGateway.create(null, messageDto, room);
-    const options = {
-      key: process.env.FIREBASE_SERVER_KEY,
-      url: process.env.FIREBASE_FCM_URL,
-    };
-    console.log(process.env,888);
     await this.storeTokenService.sendFirebaseNotification(
       receiver,
       message.message,
       Notifications.NEW_MESSAGE,
-      options,
     );
     return messageDto;
   }
