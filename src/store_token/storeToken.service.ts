@@ -36,7 +36,7 @@ export class StoreTokenService {
 
     return storeToken;
   }
-  async sendFirebaseNotification(user: UserEntity, bodyText: string, type) {
+  async sendFirebaseNotification(user: UserEntity, bodyText: string, type,options:any) {
     const storeToken = await this.storeTokenRepository.findOne({
       where: {
         userId: user.id,
@@ -45,17 +45,14 @@ export class StoreTokenService {
     if (!storeToken) {
       throw new NotFoundException('storeToken');
     }
-    const key = process.env.FIREBASE_SERVER_KEY;
-    const url = process.env.FIREBASE_FCM_URL;
-    console.log(url,1111);
     const notification = {
       title: type,
       body: bodyText,
     };
-    fetch(url, {
+    fetch(options.url, {
       method: 'POST',
       headers: {
-        Authorization: 'key=' + key,
+        Authorization: 'key=' + options.key,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({

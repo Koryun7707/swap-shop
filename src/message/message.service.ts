@@ -21,7 +21,7 @@ export class MessageService {
     public readonly messageRepository: MessageRepository,
     public readonly appGateway: AppGateway,
     public readonly storeTokenRepository: StoreTokenRepository,
-    public readonly storeTokenService: StoreTokenService
+    public readonly storeTokenService: StoreTokenService,
   ) {}
 
   async create(
@@ -55,10 +55,16 @@ export class MessageService {
     const messageDto = message.toDto();
     const room = group.id;
     await this.appGateway.create(null, messageDto, room);
+    const options = {
+      key: process.env.FIREBASE_SERVER_KEY,
+      url: process.env.FIREBASE_FCM_URL,
+    };
+    console.log(options,777);
     await this.storeTokenService.sendFirebaseNotification(
       receiver,
       message.message,
       Notifications.NEW_MESSAGE,
+      options,
     );
     return messageDto;
   }
