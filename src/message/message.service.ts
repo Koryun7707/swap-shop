@@ -13,7 +13,6 @@ import { StoreTokenRepository } from '../store_token/storeToken.repository';
 import { Notifications } from '../common/constants/notifactions';
 import { StoreTokenService } from '../store_token/storeToken.service';
 
-
 @Injectable()
 export class MessageService {
   constructor(
@@ -59,6 +58,8 @@ export class MessageService {
       receiver,
       message.message,
       Notifications.NEW_MESSAGE,
+      'message',
+      group.id,
     );
     return messageDto;
   }

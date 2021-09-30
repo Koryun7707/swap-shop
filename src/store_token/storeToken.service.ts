@@ -28,7 +28,13 @@ export class StoreTokenService {
 
     return storeToken;
   }
-  async sendFirebaseNotification(user: UserEntity, bodyText: string, type) {
+  async sendFirebaseNotification(
+    user: UserEntity,
+    bodyText: string,
+    title,
+    type,
+    groupId = null,
+  ) {
     const storeToken = await this.storeTokenRepository.findOne({
       where: {
         userId: user.id,
@@ -38,7 +44,7 @@ export class StoreTokenService {
       throw new NotFoundException('storeToken');
     }
     const notification = {
-      title: type,
+      title: title,
       body: bodyText,
     };
     const key = process.env.FIREBASE_SERVER_KEY;
@@ -53,6 +59,8 @@ export class StoreTokenService {
         notification: notification,
         to: storeToken.token,
         bodyText,
+        type,
+        groupId,
       }),
     })
       .then(async function (response) {
