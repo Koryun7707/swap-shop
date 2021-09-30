@@ -62,6 +62,7 @@ export class StoreTokenService {
           bodyText,
           type,
           groupId,
+          user
         },
       }),
     })
