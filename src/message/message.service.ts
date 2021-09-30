@@ -12,14 +12,7 @@ import { LastMessageViewerDto } from './dto/LastMessageViewerDto';
 import { StoreTokenRepository } from '../store_token/storeToken.repository';
 import { Notifications } from '../common/constants/notifactions';
 import { StoreTokenService } from '../store_token/storeToken.service';
-import * as path from 'path';
-import * as dotenv from 'dotenv';
-const env = process.env.NODE_ENV || 'development';
-const dotenv_path = path.resolve(process.cwd(), `.${env}.env`);
-const result = dotenv.config({ path: dotenv_path });
-if (result.error) {
-  /* do nothing */
-}
+
 
 @Injectable()
 export class MessageService {
@@ -28,7 +21,6 @@ export class MessageService {
     public readonly groupRepository: GroupRepository,
     public readonly messageRepository: MessageRepository,
     public readonly appGateway: AppGateway,
-    public readonly storeTokenRepository: StoreTokenRepository,
     public readonly storeTokenService: StoreTokenService,
   ) {}
 
@@ -67,7 +59,7 @@ export class MessageService {
       key: process.env.FIREBASE_SERVER_KEY,
       url: process.env.FIREBASE_FCM_URL,
     };
-    console.log(options,777);
+    console.log(process.env,888);
     await this.storeTokenService.sendFirebaseNotification(
       receiver,
       message.message,
