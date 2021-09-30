@@ -12,6 +12,14 @@ import { LastMessageViewerDto } from './dto/LastMessageViewerDto';
 import { StoreTokenRepository } from '../store_token/storeToken.repository';
 import { Notifications } from '../common/constants/notifactions';
 import { StoreTokenService } from '../store_token/storeToken.service';
+import * as path from 'path';
+import * as dotenv from 'dotenv';
+const env = process.env.NODE_ENV || 'development';
+const dotenv_path = path.resolve(process.cwd(), `.${env}.env`);
+const result = dotenv.config({ path: dotenv_path });
+if (result.error) {
+  /* do nothing */
+}
 
 @Injectable()
 export class MessageService {
