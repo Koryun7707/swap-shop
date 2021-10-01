@@ -55,7 +55,7 @@ export class MessageService {
     const room = group.id;
     await this.appGateway.create(null, messageDto, room);
     await this.storeTokenService.sendFirebaseNotification(
-      receiver,
+      user,
       message.message,
       Notifications.NEW_MESSAGE,
       'message',
