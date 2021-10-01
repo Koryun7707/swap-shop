@@ -67,8 +67,8 @@ export class SaveProductService {
       .where('saveProduct.user = :user', {
         user: user.id,
       })
-      .leftJoinAndSelect('saveProduct.user', 'user')
       .leftJoinAndSelect('saveProduct.product', 'product')
+      .leftJoinAndSelect('product.user', 'user')
       .andWhere(
         '((NOT (user.blockedBy @> ARRAY[:blockedBy]::text[])) or (user.blockedBy is null ) )',
         {
