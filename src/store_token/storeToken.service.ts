@@ -30,6 +30,7 @@ export class StoreTokenService {
   }
   async sendFirebaseNotification(
     user: UserEntity,
+    receiver: UserEntity,
     bodyText: string,
     title,
     type,
@@ -37,7 +38,7 @@ export class StoreTokenService {
   ) {
     const storeToken = await this.storeTokenRepository.findOne({
       where: {
-        userId: user.id,
+        userId: receiver.id,
       },
     });
     if (!storeToken) {
