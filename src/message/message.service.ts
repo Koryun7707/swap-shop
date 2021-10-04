@@ -9,7 +9,6 @@ import { AppGateway } from '../gateway/app.gateway';
 import { GroupRepository } from '../group/group.repository';
 import { GroupEntity } from '../group/group.entity';
 import { LastMessageViewerDto } from './dto/LastMessageViewerDto';
-import { StoreTokenRepository } from '../store_token/storeToken.repository';
 import { Notifications } from '../common/constants/notifactions';
 import { StoreTokenService } from '../store_token/storeToken.service';
 
