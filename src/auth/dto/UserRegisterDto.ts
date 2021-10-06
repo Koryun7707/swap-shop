@@ -1,8 +1,9 @@
 'use strict';
 
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, MinLength, Validate } from 'class-validator';
 import { Column } from 'typeorm';
+import { CorrectEmails } from '../../common/validators/correct-emails.validation';
 
 export class UserRegisterDto {
   @IsString()
@@ -10,6 +11,7 @@ export class UserRegisterDto {
   @IsNotEmpty({ message: 'email is required' })
   @ApiProperty()
   @Column()
+  @Validate(CorrectEmails)
   email: string;
 
   @IsString()
