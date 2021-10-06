@@ -100,7 +100,7 @@ export class MessageService {
     senderId: string;
   }> {
     const offset = query.offset ? query.offset : 0;
-    const limit = query.limit ? query.limit : 10;
+    const limit = query.limit ? query.limit : 100;
     const group = await this.groupRepository.findOne(groupId);
     if (!group) {
       throw new NotFoundException('group');
