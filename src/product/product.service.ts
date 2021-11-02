@@ -28,6 +28,7 @@ export class ProductService {
     uploadProductDto: UploadProductDto,
   ): Promise<ProductDto> {
     let imagesModel: string[];
+    console.log(uploadProductDto);
     if (uploadProductDto.images && uploadProductDto.images.length) {
       imagesModel = await Promise.all(
         uploadProductDto.images.map(async (file): Promise<string> => {
@@ -177,6 +178,7 @@ export class ProductService {
       users: users.map((item) => item.toDto()),
     };
   }
+
   private async _getNonBlockUsersProducts(
     user: UserEntity,
   ): Promise<ProductDto[]> {

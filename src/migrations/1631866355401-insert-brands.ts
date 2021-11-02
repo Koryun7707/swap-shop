@@ -8,6 +8,7 @@ export class insertBrands1631866355401 implements MigrationInterface {
     });
   }
 
+
   public async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query('DELETE FROM "brands"');
   }
