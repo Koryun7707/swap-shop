@@ -13,12 +13,17 @@ import { Not } from 'typeorm';
 import { SwapStatusesEnum } from '../enums/swap-statuses.enum';
 import { ApprovedSwapNotificationsDto } from './dto/ApprovedSwapNotificationsDto';
 import { ProductStatusEnum } from '../enums/product-status.enum';
+import { Notifications } from '../common/constants/notifactions';
+import { StoreTokenService } from '../store_token/storeToken.service';
+import { UserRepository } from '../user/user.repository';
 
 @Injectable()
 export class SwapService {
   constructor(
     public readonly swapRepository: SwapRepository,
     public readonly productRepository: ProductRepository,
+    public readonly storeTokenService: StoreTokenService,
+    public readonly userRepository: UserRepository,
   ) {}
 
   async saveSwapRequest(
@@ -49,12 +54,23 @@ export class SwapService {
     if (existSwapRequest) {
       throw new BadRequestException('You have already requested a swap.');
     }
+    const receiver = await this.userRepository.findOne({
+      id: createSwapDto.receiver,
+    });
     const swapModel = await this.swapRepository.create({
       ...createSwapDto,
       senderProduct,
       receiverProduct,
       sender: user.id,
     });
+    await this.storeTokenService.sendFirebaseNotification(
+      user,
+      receiver,
+      Notifications.NEW_SWAP_REQUEST,
+      Notifications.NEW_SWAP_REQUEST,
+      'swap',
+      swapModel.id,
+    );
     return await this.swapRepository.save(swapModel);
   }
 

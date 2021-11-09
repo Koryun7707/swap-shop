@@ -9,6 +9,8 @@ import { AppGateway } from '../gateway/app.gateway';
 import { GroupRepository } from '../group/group.repository';
 import { GroupEntity } from '../group/group.entity';
 import { LastMessageViewerDto } from './dto/LastMessageViewerDto';
+import { Notifications } from '../common/constants/notifactions';
+import { StoreTokenService } from '../store_token/storeToken.service';
 
 @Injectable()
 export class MessageService {
@@ -17,6 +19,7 @@ export class MessageService {
     public readonly groupRepository: GroupRepository,
     public readonly messageRepository: MessageRepository,
     public readonly appGateway: AppGateway,
+    public readonly storeTokenService: StoreTokenService,
   ) {}
 
   async create(
@@ -50,7 +53,14 @@ export class MessageService {
     const messageDto = message.toDto();
     const room = group.id;
     await this.appGateway.create(null, messageDto, room);
-
+    await this.storeTokenService.sendFirebaseNotification(
+      user,
+      receiver,
+      message.message,
+      Notifications.NEW_MESSAGE,
+      'message',
+      group.id,
+    );
     return messageDto;
   }
 

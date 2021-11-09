@@ -7,6 +7,8 @@ import { UserRepository } from '../user/user.repository';
 import { AppGatewayModule } from '../gateway/app.gateway.module';
 import { GroupRepository } from '../group/group.repository';
 import { GroupUserRepository } from '../group_user/groupUser.repository';
+import { StoreTokenRepository } from '../store_token/storeToken.repository';
+import { StoreTokenService } from '../store_token/storeToken.service';
 
 @Module({
   imports: [
@@ -15,10 +17,11 @@ import { GroupUserRepository } from '../group_user/groupUser.repository';
       UserRepository,
       GroupRepository,
       GroupUserRepository,
+      StoreTokenRepository,
     ]),
     forwardRef(() => AppGatewayModule),
   ],
-  providers: [MessageService],
+  providers: [MessageService, StoreTokenService],
   controllers: [MessageController],
 })
 export class MessageModule {}

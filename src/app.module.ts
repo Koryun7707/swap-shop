@@ -14,6 +14,7 @@ import { join } from 'path';
 import { DatabaseConfig } from './common/database.config';
 import { ProductTypesModule } from './productTypes/productTypes.module';
 import { BrandsModule } from './brands/brands.module';
+import { SizesModule } from './sizes/sizes.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { BrandsModule } from './brands/brands.module';
     SaveProductModule,
     ProductTypesModule,
     BrandsModule,
+    SizesModule
   ],
   controllers: [],
   providers: [AppGateway],

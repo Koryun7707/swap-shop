@@ -9,6 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
+import { StoreTokenService } from '../store_token/storeToken.service';
 import { AuthGuard } from '../guards/auth.guard';
 import { AuthUser } from '../decorators/auth-user.decorator';
 import { UserEntity } from './user.entity';
@@ -19,13 +20,18 @@ import { UserUpdateDto } from './dto/UserUpdateDto';
 import { BlockedUserDto } from './dto/BlockedUserDto';
 import { UnBlockUserDto } from './dto/UnBlockUserDto';
 import { UploadImageDto } from './dto/UploadImageDto';
+import { StoreTokenDto } from '../store_token/dto/StoreTokenDto';
+import { CreateStoreTokenDto } from '../store_token/dto/CreateStoreTokenDto';
 
 @Controller('user')
 @ApiTags('user')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 export class UserController {
-  constructor(public readonly userService: UserService) {}
+  constructor(
+    public readonly userService: UserService,
+    public readonly storeTokenService: StoreTokenService
+  ) {}
   @UseGuards(AuthGuard)
   @Get('')
   @HttpCode(HttpStatus.OK)
@@ -86,5 +92,18 @@ export class UserController {
     @Body() blockedUserDto: BlockedUserDto,
   ): Promise<UserDto> {
     return this.userService.unBlockUser(user, blockedUserDto);
+  }
+  @UseGuards(AuthGuard)
+  @Post('storeFirebaseToken')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    type: CreateStoreTokenDto,
+    description: 'storeFirebaseToken',
+  })
+  async storeToken(
+    @AuthUser() user: UserEntity,
+    @Body() createStoreTokenDto: CreateStoreTokenDto,
+  ): Promise<StoreTokenDto> {
+    return this.storeTokenService.createOrUpdate(user, createStoreTokenDto);
   }
 }

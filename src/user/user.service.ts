@@ -167,7 +167,6 @@ export class UserService {
     }
     return await this._unBlock(userBlocked, user);
   }
-
   private async _unBlock(userBlocked: UserEntity, user: UserEntity) {
     const index = userBlocked.blockedBy.indexOf(user.id);
     const index1 = user.blocked.indexOf(userBlocked.id);
