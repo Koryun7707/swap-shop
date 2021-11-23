@@ -94,6 +94,7 @@ export class AuthService {
           resetPasswordConfirmDto.password,
         ),
         verifiedCode: null,
+        verified: true,
       },
     );
     return user.toDto();

@@ -20,7 +20,7 @@ export class UserUpdateDto {
 
   @IsNotEmpty({ message: 'postCode id is required' })
   @ApiProperty()
-  postCode: number;
+  postCode: string;
 
   @IsOptional()
   @ApiProperty()

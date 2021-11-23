@@ -30,13 +30,13 @@ export class SaveProductService {
       })
       .leftJoinAndSelect('product.user', 'user')
       .andWhere(
-        '((NOT (user.blockedBy @> ARRAY[:blockedBy]::text[])) or user.blockedBy is null)',
+        '((NOT (user.blockedBy @> ARRAY[:blockedBy]::text[])) or (user.blockedBy is null) )',
         {
           blockedBy: user.id,
         },
       )
       .andWhere(
-        '((NOT (user.blocked @> ARRAY[:blocked]::text[])) or user.blocked is null)',
+        '((NOT (user.blocked @> ARRAY[:blocked]::text[])) or (user.blocked is null ) )',
         {
           blocked: user.id,
         },
@@ -70,13 +70,13 @@ export class SaveProductService {
       .leftJoinAndSelect('saveProduct.user', 'user')
       .leftJoinAndSelect('saveProduct.product', 'product')
       .andWhere(
-        '((NOT (user.blockedBy @> ARRAY[:blockedBy]::text[])) or user.blockedBy is null)',
+        '((NOT (user.blockedBy @> ARRAY[:blockedBy]::text[])) or (user.blockedBy is null ) )',
         {
           blockedBy: user.id,
         },
       )
       .andWhere(
-        '((NOT (user.blocked @> ARRAY[:blocked]::text[])) or user.blocked is null)',
+        '((NOT (user.blocked @> ARRAY[:blocked]::text[])) or (user.blocked is null ) )',
         {
           blocked: user.id,
         },

@@ -8,7 +8,7 @@ import { MessageRepository } from './message.repository';
 import { AppGateway } from '../gateway/app.gateway';
 import { GroupRepository } from '../group/group.repository';
 import { GroupEntity } from '../group/group.entity';
-import { LastMessageViewerDto } from "./dto/LastMessageViewerDto";
+import { LastMessageViewerDto } from './dto/LastMessageViewerDto';
 
 @Injectable()
 export class MessageService {
@@ -90,7 +90,7 @@ export class MessageService {
     senderId: string;
   }> {
     const offset = query.offset ? query.offset : 0;
-    const limit = query.limit ? query.limit : 10;
+    const limit = query.limit ? query.limit : 100;
     const group = await this.groupRepository.findOne(groupId);
     if (!group) {
       throw new NotFoundException('group');
@@ -152,7 +152,12 @@ export class MessageService {
       .andWhere('group.users @> ARRAY[:user]::uuid[]', {
         user: user.id,
       })
-      .leftJoinAndSelect('group.lastMessage', '_lastMessage')
+      .leftJoinAndMapOne(
+        'group.lastMessage',
+        MessageEntity,
+        '_lastMessage',
+        `_lastMessage.id = (group.lastMessage)::uuid`,
+      )
       .leftJoinAndMapMany(
         'group.users',
         UserEntity,
@@ -173,17 +178,35 @@ export class MessageService {
   async getGroup(user: UserEntity): Promise<GroupEntity[]> {
     return await this.groupRepository
       .createQueryBuilder('group')
-      .leftJoinAndSelect('group.lastMessage', '_lastMessage')
+      .leftJoinAndMapOne(
+        'group.lastMessage',
+        MessageEntity,
+        '_lastMessage',
+        `_lastMessage.id = (group.lastMessage)::uuid`,
+      )
       .where('group.users @> ARRAY[:user]::uuid[]', {
         user: user.id,
       })
+      .andWhere(
+        '(NOT(group.users && ARRAY[:...blockedBy]::uuid[]) or array_length(ARRAY[:...blockedBy]::uuid[],1) IS NULL)',
+        {
+          blockedBy:
+            !user.blockedBy || user.blockedBy[0] === '' ? [] : user.blockedBy,
+        },
+      )
+      .andWhere(
+        '(NOT(group.users && ARRAY[:...blocked]::uuid[]) or array_length(ARRAY[:...blocked]::uuid[],1) IS NULL)',
+        {
+          blocked: !user.blocked || user.blocked[0] === '' ? [] : user.blocked,
+        },
+      )
       .leftJoinAndMapMany(
         'group.users',
         UserEntity,
         'user',
         'ARRAY[(user.id)] <@ (group.users)',
       )
-      .orderBy('group.createdAt', 'ASC')
+      .orderBy('COALESCE(_lastMessage.createdAt)', 'DESC')
       .select([
         'group',
         'user.profilePicture',

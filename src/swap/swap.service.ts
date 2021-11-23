@@ -68,6 +68,7 @@ export class SwapService {
       .select([
         'swap',
         '_sender.firstName',
+        '_sender.lastName',
         '_sender.profilePicture',
         '_senderProduct',
         '_receiverProduct',
@@ -89,9 +90,11 @@ export class SwapService {
       .select([
         'swap',
         '_sender.firstName',
+        '_sender.lastName',
         '_sender.profilePicture',
         '_sender.id',
         '_receiver.firstName',
+        '_receiver.lastName',
         '_receiver.profilePicture',
         '_receiver.id',
         '_senderProduct',

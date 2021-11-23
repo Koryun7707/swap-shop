@@ -73,7 +73,13 @@ export class ProductService {
       .createQueryBuilder('product')
       .where('product.user = :userId', { userId: user.id })
       .leftJoinAndSelect('product.user', 'user')
-      .select(['product', 'user.profilePicture', 'user.id', 'user.firstName'])
+      .select([
+        'product',
+        'user.profilePicture',
+        'user.id',
+        'user.firstName',
+        'user.lastName',
+      ])
       .orderBy('product.createdAt', 'DESC');
 
     const result = await productsModel.getMany();
@@ -108,16 +114,21 @@ export class ProductService {
     const product = this.productRepository
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.user', 'user')
-      .select(['product', 'user.profilePicture', 'user.id', 'user.firstName'])
+      .select([
+        'product',
+        'user.profilePicture',
+        'user.id',
+        'user.firstName',
+        'user.lastName',
+      ])
       .where(
         new Brackets((qb) => {
           qb.where(
-            'LOWER(product.name) like :name OR LOWER(product.brandName) like :brandName OR LOWER(product.size) like :size OR LOWER(product.color) like :color OR LOWER(product.title) like :title',
+            'LOWER(product.name) like :name OR LOWER(product.brandName) like :brandName OR LOWER(product.size) like :size OR LOWER(product.title) like :title',
             {
               name: `%${search}%`,
               brandName: `%${search}%`,
               size: `%${search}%`,
-              color: `%${search}%`,
               title: `%${search}%`,
             },
           );
@@ -126,13 +137,13 @@ export class ProductService {
       .andWhere('product.user != :userId', { userId: user.id })
       .andWhere(`product.status = '${ProductStatusEnum.NOT_SWAPPED}'`)
       .andWhere(
-        '((NOT (user.blockedBy @> ARRAY[:blockedBy]::text[])) or user.blockedBy is null)',
+        '((NOT (user.blockedBy @> ARRAY[:blockedBy]::text[])) or (user.blockedBy is null))',
         {
           blockedBy: user.id,
         },
       )
       .andWhere(
-        '((NOT (user.blocked @> ARRAY[:blocked]::text[])) or user.blocked is null)',
+        '((NOT (user.blocked @> ARRAY[:blocked]::text[])) or (user.blocked is null))',
         {
           blocked: user.id,
         },
@@ -148,13 +159,13 @@ export class ProductService {
         }),
       )
       .andWhere(
-        '((NOT (user.blockedBy @> ARRAY[:blockedBy]::text[])) or user.blockedBy is null)',
+        '((NOT (user.blockedBy @> ARRAY[:blockedBy]::text[])) or (user.blockedBy is null) )',
         {
           blockedBy: user.id,
         },
       )
       .andWhere(
-        '((NOT (user.blocked @> ARRAY[:blocked]::text[])) or user.blocked is null)',
+        '((NOT (user.blocked @> ARRAY[:blocked]::text[])) or (user.blocked is null ) )',
         {
           blocked: user.id,
         },
@@ -178,6 +189,7 @@ export class ProductService {
         'user.profilePicture',
         'user.id',
         'user.firstName',
+        'user.lastName',
         'user.description',
       ])
       .where(`product.status = '${ProductStatusEnum.NOT_SWAPPED}'`);

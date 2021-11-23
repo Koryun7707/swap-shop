@@ -2,7 +2,7 @@ version: "3"
 services:
   app:
     env_file:
-      - .development.env
+      - .production.env
     container_name: awesome_nest_boilerplate
     restart: always
     build: .
@@ -13,19 +13,11 @@ services:
   postgres:
     image: postgres
     restart: always
-    environment:
-      DB_PASSWORD: postgres
+    env_file:
+      - .production.env
     ports:
       - "5433:5432"
     volumes:
       - ./db-data:/var/lib/postgresql/data
-  adminer:
-    image: adminer
-    restart: always
-    ports:
-      - "8080:8080"
   redis:
-    image: redis:alpine
-    restart: always
-    ports:
-      - "6379:6379"
+    image: redis:latest
